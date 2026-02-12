@@ -22,7 +22,7 @@ function AuthLayout({ children }) {
         <img src={reacts} alt="React Icon" className="pointer-events-none" />
       </div>
 
-      <div className="flex-1 flex items-center justify-center p-6 ">
+      <div className="flex-1 flex items-center justify-center p-18 ">
         <div className="w-1/2 bg-background-default">{children}</div>
       </div>
 
