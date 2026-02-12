@@ -4,15 +4,12 @@ import viteLogo from '/vite.svg'
 import SignIn from './Pages/Auth/SignIn'
 import SignUp from './Pages/Auth/Signup'
 import './App.css'
-
+import Landing from './pages/Landing/Landing'
 function App() {
 
   return (
     <>
-      <div className="w-full h-screen">
-         <SignUp/>
-      </div>
-        
+         
     </>
   )
 }
