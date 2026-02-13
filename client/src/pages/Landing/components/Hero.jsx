@@ -22,7 +22,7 @@ const Hero = () => {
 
       {/* Body */}
       <div
-        className="w-full h-[80vh] flex bg-cover bg-center relative">
+        className="w-full min-h-[80vh] flex bg-cover bg-center relative">
 
 
         <img
@@ -31,10 +31,11 @@ const Hero = () => {
           className="absolute  left-[55%] top-[38%] -translate-x-1/2 w-[90%] h-[80%] pointer-events-none overflow-hidden"
         />
 
-        <div className="w-1/2 flex justify-center items-center flex-col gap-5 z-10">
+        <div className="w-1/2 flex justify-center items-start flex-col gap-5 z-10">
           <h1 className="text-6xl font-bold">
-            Crack <span className="text-accent-light"> Interviews</span> with  an <span className="text-accent-light" >AI</span>
+            Crack <span className="text-accent-light"> Interviews</span> 
           </h1>
+          <h1 className="text-6xl font-bold ">with  an <span className="text-accent-light" >AI</span></h1>
           <div className="w-full">
 
             <p className="text-text-secondary font-semibold font-body text-sm ">Practice role-specific interviews with an AI that asks follow-ups,

@@ -8,7 +8,7 @@ const Working = () => {
 
       <div className='w-full flex flex-wrap justify-center gap-12'>
 
-        <div className='w-[26%] bg-white shadow-soft rounded-xl p-6 h-[300px] flex flex-col gap-3'>
+        <div className='w-[26%] bg-white shadow-soft rounded-xl p-6 h-[250px] flex flex-col gap-3'>
           <div className='flex gap-6 w-full'>
             <div className='p-5 rounded-[50%] bg-accent-dark w-[60px] h-[60px] inline-flex justify-center items-center'>
               <h1 className='text-white text-2xl'>1</h1>
@@ -22,7 +22,7 @@ const Working = () => {
           </p>
         </div>
 
-        <div className='w-[25%] bg-white shadow-soft rounded-xl p-6 h-[300px] flex flex-col gap-3'>
+        <div className='w-[25%] bg-white shadow-soft rounded-xl p-6 h-[250px] flex flex-col gap-3'>
           <div className='flex gap-6 w-full'>
             <div className='p-5 rounded-[50%] bg-accent-dark w-[60px] h-[60px] inline-flex justify-center items-center'>
               <h1 className='text-white text-2xl'>2</h1>
@@ -36,7 +36,7 @@ const Working = () => {
           </p>
         </div>
 
-        <div className='w-[25%] bg-white shadow-soft rounded-xl p-6 h-[300px] flex flex-col gap-3'>
+        <div className='w-[25%] bg-white shadow-soft rounded-xl p-6 h-[250px] flex flex-col gap-3'>
           <div className='flex gap-6 w-full'>
             <div className='p-5 rounded-[50%] bg-accent-dark w-[60px] h-[60px] inline-flex justify-center items-center'>
               <h1 className='text-white text-2xl'>3</h1>
@@ -50,7 +50,7 @@ const Working = () => {
           </p>
         </div>
 
-        <div className='w-[25%] bg-white shadow-soft rounded-xl p-6 h-[300px] flex flex-col gap-3'>
+        <div className='w-[25%] bg-white shadow-soft rounded-xl p-6 h-[250px] flex flex-col gap-3'>
           <div className='flex gap-6 w-full'>
             <div className='p-5 rounded-[50%] bg-accent-dark w-[60px] h-[60px] inline-flex justify-center items-center'>
               <h1 className='text-white text-2xl'>4</h1>

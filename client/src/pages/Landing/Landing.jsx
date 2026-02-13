@@ -7,22 +7,21 @@ import Working from './components/Working';
 import Footer from './components/Footer';
 const Landing = () => {
   return (<>
-    <div className='h-[100vh]  flex items-center flex-col'>
-      <div className='w-[80vw]'> 
-       <Hero />
-      <Features/>
+    <div className=' w-full flex items-center flex-col'>
+      <div className='w-[80vw]'>
+        <Hero />
+        <Features />
       </div>
-      <div className='w-full'>
-      <Obeservation />
-      
-      <Interviewer />
-      <Working/>
-      <Footer/>
+      <div className='w-full flex flex-col items-center'>
+        <Obeservation />
+        <Interviewer />
+        <Working />
+        <Footer />
       </div>
     </div>
   </>
-   
+
   )
 }
 
-export default Landing ;
+export default Landing;
