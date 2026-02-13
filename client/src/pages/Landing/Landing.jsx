@@ -4,7 +4,10 @@ import Features from './components/Features';
 import Obeservation from './components/Obeservation';
 import Interviewer from './components/Interviewer';
 import Working from './components/Working';
+import Getstarted from './components/GetStarted';
 import Footer from './components/Footer';
+
+
 const Landing = () => {
   return (<>
     <div className=' w-full flex items-center flex-col'>
@@ -12,10 +15,13 @@ const Landing = () => {
         <Hero />
         <Features />
       </div>
+
+
       <div className='w-full flex flex-col items-center'>
         <Obeservation />
         <Interviewer />
         <Working />
+           <Getstarted />
         <Footer />
       </div>
     </div>

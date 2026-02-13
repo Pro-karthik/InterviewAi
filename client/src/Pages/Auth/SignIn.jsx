@@ -24,7 +24,7 @@ function SignIn() {
            <input type="email"
             name="email"
             placeholder="Email"
-             className=" text-black-500 placeholder:text-black  rounded-xl p-3 pl-10 bg-orange-50 focus:outline-none focus:ring-2 focus:ring-orange-400 "
+             className=" text-black w-full placeholder:text-black  rounded-xl p-3 pl-10 bg-orange-50 focus:outline-none focus:ring-2 focus:ring-orange-400 "
             />
           </div>
           <div className="relative">
@@ -33,14 +33,13 @@ function SignIn() {
               type="password"
               name="password"
               placeholder="Password"
-              className=" text-black-500 placeholder:text-black  rounded-md p-3 pl-10 bg-orange-50 focus:outline-none focus:ring-2 focus:ring-orange-400"
+              className=" text-black w-full placeholder:text-black  rounded-xl p-3 pl-10 bg-orange-50 focus:outline-none focus:ring-2 focus:ring-orange-400"
             />
           </div>
 
           <button
             type="submit"
-            className="w-1/2 bg-accent-light text-white p-3 rounded-lg hover:bg-accent-dark transition justify-center items-center mx-auto block "
-            style={{background: "linear-gradient(90deg, #FF7A2F 0%, #FFC7A6 55%, #F4E6DA 100%)"}}
+            className="w-1/2 bg-accent-light text-white p-3 bg-gradient-to-r from-[#FF7A2F] via-[#FFC7A6] to-[#F4E6DA] rounded-lg hover:bg-accent-dark transition justify-center items-center mx-auto block "
           >
             Sign In
           </button>
