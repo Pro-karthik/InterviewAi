@@ -7,26 +7,27 @@ import Working from './components/Working';
 import Getstarted from './components/GetStarted';
 import Footer from './components/Footer';
 
+
 const Landing = () => {
   return (<>
-    <div className='h-[100vh] w-[100vw] flex items-center flex-col'>
-      <div className='w-[80vw]'> 
-       <Hero />
-      <Features/>
+    <div className=' w-full flex items-center flex-col'>
+      <div className='w-[80vw]'>
+        <Hero />
+        <Features />
       </div>
-      <div className='w-full'>
-      <Obeservation />
-      
-      <Interviewer />
-      <Working/>
-      <Getstarted />
-      <Footer />
 
+
+      <div className='w-full flex flex-col items-center'>
+        <Obeservation />
+        <Interviewer />
+        <Working />
+           <Getstarted />
+        <Footer />
       </div>
     </div>
   </>
-   
+
   )
 }
 
-export default Landing ;
+export default Landing;
