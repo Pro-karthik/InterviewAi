@@ -16,39 +16,35 @@ function Signup() {
 
         <form className="space-y-4">
           <div className="relative">
-            <AiOutlineUser className="absolute left-3 top-6 -translate-y-1/2" />
+            <AiOutlineUser className="absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="email"
               placeholder="Email"
-              className="rounded-md p-3 pl-10 placeholder:text-black bg-orange-50 focus:outline-none focus:ring-2 focus:ring-orange-400"
+              className="rounded-md w-full p-3 pl-10 placeholder:text-black bg-orange-50 focus:outline-none focus:ring-2 focus:ring-orange-400"
             />
           </div>
 
           <div className="relative">
-            <GoLock className="absolute left-3 top-6 -translate-y-1/2" />
+            <GoLock className="absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="password"
               placeholder="Password"
-              className="rounded-md p-3 pl-10 placeholder:text-black bg-orange-50 focus:outline-none focus:ring-2 focus:ring-orange-400"
+              className="rounded-xl p-3 w-full pl-10 placeholder:text-black bg-orange-50 focus:outline-none focus:ring-2 focus:ring-orange-400"
             />
           </div>
 
           <div className="relative">
-            <GoLock className="absolute left-3 top-6 -translate-y-1/2" />
+            <GoLock className="absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="password"
               placeholder="Confirm Password"
-              className="rounded-md p-3 pl-10 placeholder:text-black bg-orange-50 focus:outline-none focus:ring-2 focus:ring-orange-400"
+              className="rounded-xl p-3 pl-10 w-full placeholder:text-black bg-orange-50 focus:outline-none focus:ring-2 focus:ring-orange-400"
             />
           </div>
 
           <button
             type="submit"
-            className="w-1/2 mx-auto block text-white p-3 rounded-xl"
-            style={{
-              background:
-                "linear-gradient(90deg,#FF7A2F 0%,#FFC7A6 55%,#F4E6DA 100%)",
-            }}
+            className="w-1/2 mx-auto block text-white p-3 rounded-xl bg-gradient-to-r from-[#FF7A2F] via-[#FFC7A6] to-[#F4E6DA]"
           >
             Sign Up
           </button>
