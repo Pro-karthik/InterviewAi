@@ -1,0 +1,21 @@
+CREATE TYPE user_role_enum AS ENUM ('USER', 'ADMIN');
+
+CREATE TYPE session_status_enum AS ENUM (
+  'CREATED',
+  'IN_PROGRESS',
+  'COMPLETED',
+  'EVALUATED',
+  'TERMINATED'
+);
+
+CREATE TYPE risk_level_enum AS ENUM ('LOW', 'MEDIUM', 'HIGH');
+
+CREATE TYPE proctor_event_enum AS ENUM (
+  'HEAD_YAW',
+  'HEAD_PITCH',
+  'NO_FACE',
+  'MULTIPLE_FACES',
+  'TAB_VISIBILITY',
+  'WINDOW_FOCUS',
+  'FULLSCREEN_EXIT'
+);
