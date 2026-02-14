@@ -11,7 +11,7 @@ import pencil from '../../../assets/icons/pencil.png'
 import circle from '../../../assets/icons/circle.png'
 
 
-const Obeservation = () => {
+const Observation = () => {
     return (
         <div className='w-full font-body mt-[80px] relative'>
             
@@ -85,4 +85,4 @@ const Obeservation = () => {
     )
 }
 
-export default Obeservation;
+export default Observation;

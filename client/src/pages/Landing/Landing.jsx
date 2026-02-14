@@ -1,7 +1,7 @@
 import React from 'react'
 import Hero from './components/Hero';
 import Features from './components/Features';
-import Obeservation from './components/Obeservation';
+import Observation from './components/Observation';
 import Interviewer from './components/Interviewer';
 import Working from './components/Working';
 import Getstarted from './components/GetStarted';
@@ -18,7 +18,7 @@ const Landing = () => {
 
 
       <div className='w-full flex flex-col items-center'>
-        <Obeservation />
+        <Observation />
         <Interviewer />
         <Working />
            <Getstarted />

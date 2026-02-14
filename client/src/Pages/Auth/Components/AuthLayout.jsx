@@ -8,7 +8,7 @@ import reacts from "../../../assets/icons/react-icon.png";
 
 function AuthLayout({ children }) {
   return (
-    <div className="min-h-screen flex ">
+    <div className="min-h-screen flex relative">
       <div className="absolute bottom-4 left-4 flex items-center space-x-2">
         <img src={bulb} alt="Bulb Icon" />
       </div>
