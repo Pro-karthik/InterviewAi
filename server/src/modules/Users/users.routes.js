@@ -1,7 +1,7 @@
 import express from 'express';
 import { registerusercontroller,loginusercontroller,getUserByIdcontroller } from './users.controllers.js';
-import { authenticate,loginRatelimiter } from '../../middlewares/authmiddleware.js';
-import { validationMiddleware } from '../../middlewares/validationmiddleware.js';
+import { authenticate,loginRatelimiter } from '../../middlewares/auth.middleware.js';
+import { validationMiddleware } from '../../middlewares/validation.middleware.js';
 import { registervalidator,LoginValidator } from './users.vaildator.js';
 import { refreshTokenController } from '../Refreshtoken/refreshtoken.endpoint.js';
 
