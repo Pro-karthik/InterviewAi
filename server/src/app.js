@@ -1,21 +1,19 @@
 import express from "express";
 import cors from "cors";
+import { errorMiddleware } from "./middlewares/errorMiddleware.js";
+import proctoringRoutes from "./modules/proctoring/proctoring.routes.js";
 
 const app = express();
 
-/* ---------- Middlewares ---------- */
+
 app.use(cors());
 app.use(express.json());
+app.use(errorMiddleware);
 
-/* ---------- Health Check ---------- */
-app.get("/health", (req, res) => {
-  res.status(200).json({ status: "ok", service: "ai-mock-interviewer-api" });
-});
 
-/* ---------- Base Route ---------- */
-app.get("/", (req, res) => {
-  res.send("AI Mock Interviewer API is running");
-});
+app.use("/api/proctoring", proctoringRoutes);
 
-/* ---------- Export App ---------- */
+
+
+
 export default app;
