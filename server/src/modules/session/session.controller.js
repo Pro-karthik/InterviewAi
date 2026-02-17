@@ -9,8 +9,8 @@ import {
 // 1️⃣ Start Interview
 export const startInterview = async (req, res, next) => {
   try {
-    // const userId = req.user.id;
-    const userId = 'dd51fbcd-c77b-4e70-afa0-e78f49fde748'
+    const userId = req.user.id;
+  
     const { skill, experience } = req.body;
 
     const result = await startInterviewService(
@@ -30,8 +30,7 @@ export const startInterview = async (req, res, next) => {
 export const submitAnswers = async (req, res, next) => {
   try {
     const sessionId = req.params.id;
-    // const userId = req.user.id;
-    const userId = 'dd51fbcd-c77b-4e70-afa0-e78f49fde748'
+    const userId = req.user.id;
 
     const { answers } = req.body;
 
@@ -52,9 +51,9 @@ export const submitAnswers = async (req, res, next) => {
 export const evaluateSession = async (req, res, next) => {
   try {
     const sessionId = req.params.id;
-    const userId = 'dd51fbcd-c77b-4e70-afa0-e78f49fde748'
+   
 
-    // const userId = req.user.id;
+    const userId = req.user.id;
 
     const result = await evaluateSessionService(
       sessionId,
@@ -72,9 +71,8 @@ export const evaluateSession = async (req, res, next) => {
 export const getSession = async (req, res, next) => {
   try {
     const sessionId = req.params.id;
-    // const userId = req.user.id;
-    const userId = 'dd51fbcd-c77b-4e70-afa0-e78f49fde748'
-    
+    const userId = req.user.id;
+   
 
     const result = await getSessionService(
       sessionId,

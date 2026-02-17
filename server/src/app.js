@@ -1,11 +1,12 @@
 import express from "express";
 import cors from "cors";
-import { errorMiddleware } from "./middlewares/errorMiddleware.js";
-import proctoringRoutes from "./modules/proctoring/proctoring.routes.js";
-import userRoutes from './modules/Users/users.routes.js';
+import { errorMiddleware } from "./middlewares/error.middleware.js";
 import cookie from "cookie-parser";
 
+import proctoringRoutes from "./modules/proctoring/proctoring.routes.js";
+import userRoutes from './modules/Users/users.routes.js';
 import sessionRouter from "./modules/session/session.routes.js"
+
 const app = express();
 
 
