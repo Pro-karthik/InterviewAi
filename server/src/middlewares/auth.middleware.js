@@ -11,7 +11,7 @@ export const authenticate = (req, res, next) => {
 
     const token = authHeader.split(" ")[1];
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = verifyToken(token);
     
     req.user = decoded;
 
@@ -20,7 +20,6 @@ export const authenticate = (req, res, next) => {
     return res.status(401).json({ message: "Token expired or invalid" });
   }
 };
-
 export const loginRatelimiter=ratelimit({
     windowMs:15*60*1000,
     max:5,

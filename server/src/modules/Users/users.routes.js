@@ -1,15 +1,15 @@
 import express from 'express';
-import { registerusercontroller,loginusercontroller,getUserByIdcontroller } from './users.controllers.js';
+import { registerController,loginController,getUserByIdController ,refreshController,logoutController} from './users.controllers.js';
 import { authenticate,loginRatelimiter } from '../../middlewares/auth.middleware.js';
 import { validationMiddleware } from '../../middlewares/validation.middleware.js';
 import { registervalidator,LoginValidator } from './users.vaildator.js';
-import { refreshTokenController } from '../Refreshtoken/refreshtoken.endpoint.js';
 
 const router=express.Router();
 
 
-router.post('/register',validationMiddleware(registervalidator),registerusercontroller);
-router.post('/login',loginRatelimiter,validationMiddleware(LoginValidator),loginusercontroller );
-router.get('/profile',authenticate,getUserByIdcontroller);
-router.post("/refresh", refreshTokenController);
+router.post('/register',validationMiddleware(registervalidator),registerController);
+router.post('/login',loginRatelimiter,validationMiddleware(LoginValidator),loginController );
+router.get('/profile',authenticate,getUserByIdController);
+router.post("/refresh", refreshController);
+router.post("/logout",authenticate,logoutController);
 export default router;
