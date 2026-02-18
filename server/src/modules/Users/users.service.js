@@ -1,90 +1,138 @@
 import pool from "../../config/db.js";
-import { hashPassword, comparePassword } from "../../utils/hash.js";
-import {
-  createUserQuery,
-  findUserByEmailQuery,
-  findUserByIdQuery,
-} from "./users.queries.js";
-import { generateToken,generateRefreshToken } from "../../utils/token.js";
-import { updateLastLoginQuery } from "./users.queries.js";
-import { insertRefreshTokenQuery } from "../Refreshtoken/refreshtoken.queries.js";
-import { ApiError } from "../../utils/ApiError.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { findUserRefreshTokensQuery, revokeRefreshTokenQuery } from "../Refreshtoken/refreshtoken.queries.js";
-import { revokeAllUserTokensQuery } from "../Refreshtoken/refreshtoken.queries.js";
+import { ApiError } from "../../utils/ApiError.js";
+  import {
+  findUserByEmailQuery,
+  findUserByIdQuery,
+  updateLastLoginQuery,
+  insertRefreshTokenQuery,
+  findUserRefreshTokensQuery,
+  revokeRefreshTokenQuery,
+  revokeAllUserTokensQuery
+} from "./users.queries.js";
+import {
+  generateToken,
+  generateRefreshToken
+} from "../../utils/token.js";
+import { comparePassword } from "../../utils/hash.js";
 
-export const registerUser = async (email, password, role) => {
+export const registerUser = async (email, password) => {
   const { rows } = await pool.query(findUserByEmailQuery, [email]);
+
   if (rows[0]) {
-    throw new ApiError(400, "Email already in use");
+    throw new ApiError(400, "Email already exists");
   }
 
-  const hashedPassword = await hashPassword(password);
+  const hashedPassword = await bcrypt.hash(password, 10);
 
-  const roleMap = {
-    user: "USER",
-    admin: "ADMIN",
-  };
+  const { rows: newUser } = await pool.query(
+    `INSERT INTO users (email, password)
+     VALUES ($1, $2)
+     RETURNING *`,
+    [email, hashedPassword]
+  );
 
-  const normalizedRole = roleMap[role] || "USER";
+  const user = newUser[0];
 
+  const accessToken = generateToken({ id: user.id });
+  const refreshToken = generateRefreshToken({ id: user.id });
 
-  console.log("Normalized Role:", normalizedRole); // Debugging log
-  console.log(email, hashedPassword, normalizedRole); // Debugging log
-  const { rows: newUser } = await pool.query(createUserQuery, [
-    email,
-    hashedPassword,
-    normalizedRole,
-  ]);
-
-  return newUser[0];
-};
-export const loginUser = async (email, password) => {
-  const { rows } = await pool.query(findUserByEmailQuery, [email]);
-  const user = rows[0];
-
-  if (!user) {
-    throw new ApiError(400, "Invalid email or password");
-  }
-
-  if (!user.is_active) {
-    throw new ApiError(403, "Account is inactive");
-  }
-
-  const isPasswordValid = await comparePassword(password, user.password);
-  if (!isPasswordValid) {
-    throw new ApiError(400, "Invalid email or password");
-  }
-
-  await pool.query(updateLastLoginQuery, [user.id]);
-
-  const accessToken = generateToken({
-    id: user.id,
-    email: user.email,
-    role: user.role,
-  });
-
-  const refreshToken = generateRefreshToken({
-    id: user.id,
-  });
-
-  const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
-
-  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+  const hashedRefresh = await bcrypt.hash(refreshToken, 10);
 
   await pool.query(insertRefreshTokenQuery, [
     user.id,
-    hashedRefreshToken,
-    expiresAt,
+    hashedRefresh,
+    new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
   ]);
 
   return { accessToken, refreshToken };
 };
 
+
+export const loginUser = async (email, password) => {
+  const { rows } = await pool.query(findUserByEmailQuery, [email]);
+  const user = rows[0];
+
+  if (!user) throw new ApiError(400, "Invalid credentials");
+
+  const isValid = await comparePassword(password, user.password);
+  if (!isValid) throw new ApiError(400, "Invalid credentials");
+
+  await pool.query(updateLastLoginQuery, [user.id]);
+
+  const accessToken = generateToken({ id: user.id });
+  const refreshToken = generateRefreshToken({ id: user.id });
+
+  const hashedRefresh = await bcrypt.hash(refreshToken, 10);
+
+  await pool.query(insertRefreshTokenQuery, [
+    user.id,
+    hashedRefresh,
+    new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+  ]);
+
+  return { accessToken, refreshToken };
+};
+
+export const refreshAccessToken = async (refreshToken) => {
+  if (!refreshToken) {
+    throw new ApiError(401, "No refresh token");
+  }
+
+  let decoded;
+  try {
+    decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+  } catch {
+    throw new ApiError(403, "Invalid refresh token");
+  }
+
+  const { rows } = await pool.query(
+    findUserRefreshTokensQuery,
+    [decoded.id]
+  );
+
+  let matchedToken = null;
+
+  for (let tokenRow of rows) {
+    const match = await bcrypt.compare(
+      refreshToken,
+      tokenRow.token
+    );
+
+    if (match) {
+      matchedToken = tokenRow;
+      break;
+    }
+  }
+
+  if (!matchedToken) {
+    throw new ApiError(403, "Refresh token not found");
+  }
+
+  if (matchedToken.expires_at < new Date()) {
+    throw new ApiError(403, "Refresh token expired");
+  }
+  await pool.query(revokeRefreshTokenQuery, [matchedToken.id]);
+
+  const newAccessToken = generateToken({ id: decoded.id });
+  const newRefreshToken = generateRefreshToken({ id: decoded.id });
+
+  const newHashed = await bcrypt.hash(newRefreshToken, 10);
+
+  await pool.query(insertRefreshTokenQuery, [
+    decoded.id,
+    newHashed,
+    new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+  ]);
+
+  return { newAccessToken, newRefreshToken };
+};
 export const getUserById = async (id) => {
   const { rows } = await pool.query(findUserByIdQuery, [id]);
-  const user = rows[0];
-  if (!user) throw new ApiError(404, "User not found");
-  return user;
+  return rows[0];
+};
+
+export const logoutUser = async (userId) => {
+  await pool.query(revokeAllUserTokensQuery, [userId]);
 };
