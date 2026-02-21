@@ -288,6 +288,17 @@ export async function getSessionService(sessionId, userId) {
   }
 }
 
+export async function getSessionHistoryService(userId) {
+  const client = await pool.connect();
+  try {
+    const result = await queries.getSessionHistory(client, userId);
+    return result;
+  } finally {
+    client.release();
+  }
+}
+  
+
 
 function calculateAverages(answers) {
   const total = answers.length;
