@@ -8,10 +8,10 @@ const router = express.Router();
 router.post("/interview/start", authenticate, sessionController.startInterview);
 
 // Submit Answers
-router.post("/:id/submit",authenticate, sessionController.submitAnswers);
+router.post("/:id/submit", authenticate, sessionController.submitAnswers);
 
 // Evaluate Session
-router.post("/:id/evaluate",authenticate, sessionController.evaluateSession);
+router.post("/:id/evaluate", authenticate, sessionController.evaluateSession);
 
 // Get Session
 router.get("/:id", authenticate, sessionController.getSession);

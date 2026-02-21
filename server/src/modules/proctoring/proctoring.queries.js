@@ -35,3 +35,20 @@ UPDATE session_security
 SET terminated = TRUE
 WHERE session_id = $1;
 `;
+
+export const updateSecurityDynamicQuery = (column) => `
+UPDATE session_security
+SET ${column} = ${column} + $1,
+    total_score = total_score + $2,
+    violation_count = violation_count + 1,
+    updated_at = NOW()
+WHERE session_id = $3
+RETURNING total_score;
+`;
+
+export const updateHeartbeatQuery = `
+UPDATE session_security
+SET last_heartbeat_at = NOW(),
+    updated_at = NOW()
+WHERE session_id = $1;
+`;
