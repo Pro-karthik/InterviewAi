@@ -101,21 +101,24 @@ export async function insertSessionAnalysis(
   data
 ) {
   const {
-    overall_score,
-    technical_avg,
-    depth_avg,
-    clarity_avg,
-    problem_solving_avg,
-    communication_avg,
-    strengths,
-    weaknesses,
-    improvement_plan
+    overall_score = null,
+    technical_avg = null,
+    depth_avg = null,
+    clarity_avg = null,
+    problem_solving_avg = null,
+    communication_avg = null,
+    strengths = null,
+    weaknesses = null,
+    improvement_plan = null,
+    malpractice_flag = false,
+    malpractice_summary = null
   } = data;
 
   await client.query(
     `
     INSERT INTO session_analysis
     (
+      id,
       session_id,
       overall_score,
       technical_avg,
@@ -126,11 +129,32 @@ export async function insertSessionAnalysis(
       strengths,
       weaknesses,
       improvement_plan,
+      malpractice_flag,
+      malpractice_summary,
       created_at,
       updated_at
     )
     VALUES
-    ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,NOW(),NOW());
+    (
+      gen_random_uuid(),
+      $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,
+      NOW(),
+      NOW()
+    )
+    ON CONFLICT (session_id)
+    DO UPDATE SET
+      overall_score = EXCLUDED.overall_score,
+      technical_avg = EXCLUDED.technical_avg,
+      depth_avg = EXCLUDED.depth_avg,
+      clarity_avg = EXCLUDED.clarity_avg,
+      problem_solving_avg = EXCLUDED.problem_solving_avg,
+      communication_avg = EXCLUDED.communication_avg,
+      strengths = EXCLUDED.strengths,
+      weaknesses = EXCLUDED.weaknesses,
+      improvement_plan = EXCLUDED.improvement_plan,
+      malpractice_flag = EXCLUDED.malpractice_flag,
+      malpractice_summary = EXCLUDED.malpractice_summary,
+      updated_at = NOW();
     `,
     [
       sessionId,
@@ -142,12 +166,12 @@ export async function insertSessionAnalysis(
       communication_avg,
       strengths,
       weaknesses,
-      improvement_plan
+      improvement_plan,
+      malpractice_flag,
+      malpractice_summary
     ]
   );
 }
-
-
 
 export async function updateAnswerScores(
   client,
@@ -196,3 +220,70 @@ export async function updateSessionOverallScore(
     [overallScore, sessionId]
   );
 }
+
+export const createSessionSecurity = async (client, sessionId) => {
+  await client.query(
+    `
+    INSERT INTO session_security (
+      session_id,
+      total_score,
+      violation_count,
+      total_no_face_ms,
+      total_multi_face_ms,
+      total_head_yaw_ms,
+      total_head_pitch_ms,
+      tab_visibility_count,
+      window_blur_count,
+      fullscreen_exit_count,
+      terminated,
+      created_at,
+      updated_at
+    )
+    VALUES (
+      $1,
+      0,0,0,0,0,0,0,0,0,
+      false,
+      NOW(),
+      NOW()
+    )
+    `,
+    [sessionId]
+  );
+};
+
+
+export const getSessionAnalysisBySessionId = async (client, sessionId) => {
+  const result = await client.query(
+    `SELECT id FROM session_analysis WHERE session_id = $1`,
+    [sessionId]
+  );
+
+  return result.rows[0] || null;
+};
+
+export const getSessionSecurity = async (client, sessionId) => {
+  const result = await client.query(
+    `SELECT * FROM session_security WHERE session_id = $1`,
+    [sessionId]
+  );
+
+  return result.rows[0];
+};
+
+export const updateSessionRisk = async (
+  client,
+  sessionId,
+  riskScore,
+  riskLevel
+) => {
+  await client.query(
+    `
+    UPDATE interview_sessions
+    SET risk_score = $1,
+        risk_level = $2,
+        updated_at = NOW()
+    WHERE id = $3
+    `,
+    [riskScore, riskLevel, sessionId]
+  );
+};

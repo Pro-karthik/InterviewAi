@@ -9,7 +9,7 @@ import {
 // 1️⃣ Start Interview
 export const startInterview = async (req, res, next) => {
   try {
-    const userId = req.user.id;
+     const userId = req.user.id;
   
     const { skill, experience } = req.body;
 
@@ -31,7 +31,7 @@ export const submitAnswers = async (req, res, next) => {
   try {
     const sessionId = req.params.id;
     const userId = req.user.id;
-
+    
     const { answers } = req.body;
 
     const result = await submitAnswersService(
@@ -54,6 +54,7 @@ export const evaluateSession = async (req, res, next) => {
    
 
     const userId = req.user.id;
+      
 
     const result = await evaluateSessionService(
       sessionId,

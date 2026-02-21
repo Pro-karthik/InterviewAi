@@ -1,6 +1,7 @@
 import pool from "../../config/db.js";
 import { generateQuestions, evaluateSession } from "../../ai/ai.service.js";
 import * as queries from "./session.queries.js";
+import { MAX_TOTAL_SCORE } from "../../utils/securityConstants.js";
 
 
 export async function startInterviewService(userId, skill, experience) {
@@ -16,6 +17,8 @@ export async function startInterviewService(userId, skill, experience) {
       skill,
       experience
     );
+
+    await queries.createSessionSecurity(client, session.id);
 
     // AI Call (ONLY ONCE)
     const aiResponse = await generateQuestions(skill, experience);
@@ -129,9 +132,81 @@ export async function evaluateSessionService(sessionId, userId) {
       throw new Error("Unauthorized");
     }
 
-    if (session.status !== "COMPLETED") {
+    if (!["COMPLETED", "TERMINATED"].includes(session.status)) {
       throw new Error("Session not ready for evaluation");
     }
+
+    // 🔒 Prevent double evaluation
+    const existingAnalysis = await queries.getSessionAnalysisBySessionId(
+      client,
+      sessionId
+    );
+
+    if (existingAnalysis) {
+      await client.query("ROLLBACK");
+      return {
+        message: "Session already evaluated"
+      };
+    }
+
+    // 🔐 Fetch security data
+    const security = await queries.getSessionSecurity(client, sessionId);
+
+    const malpracticeFlag =
+      security.total_score >= MAX_TOTAL_SCORE ||
+      security.terminated === true;
+
+    const malpracticeSummary = {
+      totalScore: security.total_score,
+      tabSwitches: security.tab_visibility_count,
+      multiFaceMs: security.total_multi_face_ms,
+      noFaceMs: security.total_no_face_ms,
+      terminatedBySystem: security.terminated
+    };
+    // Calculate risk score
+let riskScore =
+  (security.total_score / MAX_TOTAL_SCORE) * 70 +
+  (security.tab_visibility_count * 2) +
+  (security.window_blur_count * 3);
+
+riskScore = Math.min(100, Math.round(riskScore));
+
+let riskLevel;
+if (riskScore < 30) {
+  riskLevel = "LOW";
+} else if (riskScore < 70) {
+  riskLevel = "MEDIUM";
+} else {
+  riskLevel = "HIGH";
+}
+
+await queries.updateSessionRisk(client, sessionId, riskScore, riskLevel);
+    // 🔴 CASE 1 — TERMINATED (Skip AI)
+    if (session.status === "TERMINATED") {
+
+      await queries.insertSessionAnalysis(client, sessionId, {
+        overall_score: null,
+        technical_avg: null,
+        depth_avg: null,
+        clarity_avg: null,
+        problem_solving_avg: null,
+        communication_avg: null,
+        strengths: null,
+        weaknesses: null,
+        improvement_plan: null,
+        malpractice_flag: true,
+        malpractice_summary: malpracticeSummary
+      });
+
+      await client.query("COMMIT");
+
+      return {
+        message: "Session terminated due to malpractice",
+        malpracticeFlag: true
+      };
+    }
+
+    // 🟢 CASE 2 — COMPLETED (Run AI)
 
     const qaData = await queries.getFullSessionData(client, sessionId);
 
@@ -139,30 +214,24 @@ export async function evaluateSessionService(sessionId, userId) {
       throw new Error("Incomplete answers");
     }
 
-    // ONE AI CALL
     const evaluation = await evaluateSession({
       skill: session.skill,
       experience: session.experience_level,
       questions_and_answers: qaData
     });
 
-    // Calculate averages
     const averages = calculateAverages(evaluation.answers);
 
-    // Update per-question scores
     for (const ans of evaluation.answers) {
       await queries.updateAnswerScores(client, ans);
     }
 
-    // Insert session analysis (merged data)
-    await queries.insertSessionAnalysis(
-      client,
-      sessionId,
-      {
-        ...evaluation,
-        ...averages
-      }
-    );
+    await queries.insertSessionAnalysis(client, sessionId, {
+      ...evaluation,
+      ...averages,
+      malpractice_flag: malpracticeFlag,
+      malpractice_summary: malpracticeSummary
+    });
 
     await queries.updateSessionOverallScore(
       client,
@@ -170,8 +239,6 @@ export async function evaluateSessionService(sessionId, userId) {
       evaluation.overall_score
     );
 
-
-    // Update status → EVALUATED
     await queries.updateSessionStatus(
       client,
       sessionId,
@@ -182,6 +249,7 @@ export async function evaluateSessionService(sessionId, userId) {
 
     return {
       evaluation,
+      malpracticeFlag,
       message: "Session evaluated successfully"
     };
 
@@ -192,7 +260,6 @@ export async function evaluateSessionService(sessionId, userId) {
     client.release();
   }
 }
-
 
 
 export async function getSessionService(sessionId, userId) {

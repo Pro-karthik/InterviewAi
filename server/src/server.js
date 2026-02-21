@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
 import app from "./app.js";
 import pool from "./config/db.js";
+import { startHeartbeatWorker } from "./workers/heartbeat.worker.js";
 
 dotenv.config();
 
@@ -21,3 +22,4 @@ const startServer = async () => {
 };
 
 startServer();
+startHeartbeatWorker();
