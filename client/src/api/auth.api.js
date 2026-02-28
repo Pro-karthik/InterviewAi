@@ -11,3 +11,6 @@ export const refreshAccessToken = () =>
 
 export const logoutUser = () =>
   axios.post("/users/logout");
+
+export const logout = () =>
+  axios.post('/users/logout');
