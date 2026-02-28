@@ -3,6 +3,7 @@ import logo from "../../../assets/logo.png";
 import bgroundImage from "../../../assets/illustrations/bg_ground.png";
 import sideImage from "../../../assets/illustrations/side_image.png"
 import ellipse from "../../../assets/illustrations/Ellipse.png"
+import { Link } from "react-router-dom";
 
 const Hero = () => {
   return (
@@ -14,9 +15,11 @@ const Hero = () => {
         </div>
 
         <div>
-          <button className="bg-primary-dark text-text-white px-5 py-2 text-lg rounded-3xl font-body border-none">
-            Get Started
-          </button>
+          <Link to="/signup">
+            <button className="bg-primary-dark text-text-white px-5 py-2 text-lg rounded-3xl font-body border-none">
+              Get Started
+            </button>
+          </Link>
         </div>
       </div>
 

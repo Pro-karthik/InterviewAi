@@ -77,8 +77,8 @@ export const loginUser = async (email, password) => {
 
 export const refreshAccessToken = async (refreshToken) => {
   if (!refreshToken) {
-    throw new ApiError(401, "No refresh token");
-  }
+  return { newAccessToken: null, newRefreshToken: null };
+}
 
   let decoded;
   try {
