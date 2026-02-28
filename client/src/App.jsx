@@ -6,6 +6,7 @@ import Signup from "./pages/Auth/Signup";
 import Dashboard from "./Pages/Dashboard/Dashboard";
 import { AuthProvider } from "./context/AuthContext";
 import ToastProvider from "./components/ToastProvider";
+import NotFound from "./Pages/NotFound";
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
           <Route path="/signin" element={<SignIn />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/dashboard" element={<Dashboard />} />
+           <Route path="*" element={<NotFound />} />
       </Routes>
       </AuthProvider>
     </BrowserRouter>
