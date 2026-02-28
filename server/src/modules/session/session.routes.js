@@ -13,8 +13,12 @@ router.post("/:id/submit", authenticate, sessionController.submitAnswers);
 // Evaluate Session
 router.post("/:id/evaluate", authenticate, sessionController.evaluateSession);
 
+// history
+router.get("/history", authenticate, sessionController.getSessionHistory);
+
 // Get Session
 router.get("/:id", authenticate, sessionController.getSession);
+
 
 
 export default router; 

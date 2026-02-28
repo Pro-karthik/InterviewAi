@@ -7,9 +7,6 @@ export const startHeartbeatWorker = () => {
 
   // Runs every 10 seconds
   cron.schedule("*/10 * * * * *", async () => {
-
-    console.log("🔍 Checking stale heartbeats...");
-
     try {
 
       const result = await pool.query(`
