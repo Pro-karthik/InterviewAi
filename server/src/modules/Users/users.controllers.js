@@ -23,8 +23,12 @@ export const registerController = async (req, res, next) => {
     res.json({ accessToken });
     res.status(201).json({ message: "User registered successfully", accessToken ,refreshToken,user:{email:req.body.email} ,id:req.user.id});
 
-  } catch (err) {
-    next(err);
+  } catch (error) {
+    res.status(error.statusCode || 500).json({
+      success: false,
+      message: error.message,
+    });
+    next()
   }
 };
 
@@ -44,8 +48,12 @@ export const loginController = async (req, res, next) => {
 
     res.json({ accessToken });
 
-  } catch (err) {
-    next(err);
+  } catch (error) {
+    res.status(error.statusCode || 500).json({
+      success:false,
+      message:error.message,
+    });
+    next();
   }
 };
 
