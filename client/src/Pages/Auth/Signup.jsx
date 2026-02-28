@@ -10,7 +10,10 @@ import { useAuth } from "../../context/AuthContext";
 
 function Signup() {
   const navigate = useNavigate();
-  const { setAccessToken } = useAuth();
+ const { accessToken, setAccessToken } = useAuth();
+   if (accessToken) {
+     navigate("/dashboard");
+   }
 
   const [formData, setFormData] = useState({
     email: "",
