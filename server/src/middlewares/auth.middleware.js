@@ -20,6 +20,7 @@ export const authenticate = (req, res, next) => {
     return res.status(401).json({ message: "Token expired or invalid" });
   }
 };
+
 export const loginRatelimiter=ratelimit({
     windowMs:15*60*1000,
     max:5,

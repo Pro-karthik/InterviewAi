@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import AuthLayout from "./Components/AuthLayout";
 import AuthFormWrapper from "./Components/AuthFormWrapper";
 import { AiOutlineUser } from "react-icons/ai";
@@ -7,35 +7,61 @@ import OauthButtons from "./Components/OauthButtons";
 import { Link, useNavigate } from "react-router-dom";
 import { loginUser } from "../../api/auth.api";
 import { useAuth } from "../../context/AuthContext";
+import { toast } from "react-toastify";
 
 function SignIn() {
   const navigate = useNavigate();
   const { accessToken, setAccessToken } = useAuth();
-  if (accessToken) {
-    navigate("/dashboard");
-  }
 
   const [formData, setFormData] = useState({
     email: "",
-    password: ""
+    password: "",
   });
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  // ✅ Redirect AFTER render
+  useEffect(() => {
+    if (accessToken) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [accessToken, navigate]);
+
+  // ✅ Stable toast handler
+  const handleToast = useCallback((message, type) => {
+    if (!message) return;
+
+    const options = {
+      className: "bg-green-600 text-white rounded-lg shadow-lg",
+      progressClassName: "bg-green-300",
+    };
+
+    if (type === "success") {
+      toast.success(message, options);
+    } else {
+      toast.error(message, options);
+    }
+  }, []);
+
   const handleChange = (e) => {
-    setFormData(prev => ({
+    const { name, value } = e.target;
+
+    setFormData((prev) => ({
       ...prev,
-      [e.target.name]: e.target.value
+      [name]: value,
     }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (loading) return; // prevent double submit
     setError("");
 
     if (!formData.email || !formData.password) {
       setError("Please fill all fields");
+      handleToast("Please fill all fields", "failure");
       return;
     }
 
@@ -44,16 +70,18 @@ function SignIn() {
 
       const { data } = await loginUser(formData);
 
-      // Store access token in memory
+      // Store token in memory (context)
       setAccessToken(data.accessToken);
 
-      // Redirect to dashboard
-      navigate("/dashboard");
+      handleToast("Login Successful", "success");
 
+      // navigation handled by useEffect
     } catch (err) {
-      setError(
-        err.response?.data?.message || "Login failed"
-      );
+      const message =
+        err?.response?.data?.message || "Login failed. Please try again.";
+
+      setError(message);
+      handleToast(message, "failure");
     } finally {
       setLoading(false);
     }
@@ -65,18 +93,12 @@ function SignIn() {
         <h3 className="text-xl font-bold font-fontFamily-heading mb-2 text-center">
           LOGIN
         </h3>
+
         <p className="text-gray-600 text-center mb-4">
           Enter your credentials to access your account
         </p>
 
-        {/* Error Message */}
-        {error && (
-          <div className="text-red-500 text-sm text-center mb-2">
-            {error}
-          </div>
-        )}
 
-        {/* Form */}
         <form className="space-y-4" onSubmit={handleSubmit}>
           <div className="relative">
             <AiOutlineUser className="absolute left-3 top-1/2 transform -translate-y-1/2 text-black-400" />

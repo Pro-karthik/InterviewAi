@@ -1,20 +1,18 @@
 import React, { useState } from "react";
-import logo from '../assets/logo.png'
-import {
-  GoPlus
-} from "react-icons/go";
-import {
-  MdOutlineDashboard
-} from "react-icons/md";
+import { useNavigate } from "react-router-dom";
+import logo from "../assets/logo.png";
+import { GoPlus } from "react-icons/go";
+import { MdOutlineDashboard } from "react-icons/md";
 import {
   IoTimeOutline,
   IoNotificationsOutline,
   IoSettingsOutline,
   IoLogOutOutline,
-  IoMenu
+  IoMenu,
 } from "react-icons/io5";
 import { HiOutlineDocumentText } from "react-icons/hi";
-import { FaRobot } from "react-icons/fa";
+import {logout} from '../api/auth.api'
+import { useAuth } from "../context/AuthContext";
 
 const navItems = [
   { icon: MdOutlineDashboard, label: "Overview" },
@@ -25,10 +23,34 @@ const navItems = [
 ];
 
 function Sidebar({ isOpen, setIsOpen }) {
-   const [isHovered, setIsHovered] = useState(false);
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
 
-  const expanded = isOpen 
+  const expanded = isOpen;
 
+ const { setAccessToken } = useAuth();
+
+const handleLogout = async () => {
+  if (loading) return;
+
+  setLoading(true);
+
+  try {
+    await logout(); // clears refresh cookie on backend
+  } catch (error) {
+    console.error(
+      "Logout API error:",
+      error?.response?.data || error.message
+    );
+  } finally {
+    
+    setAccessToken(null);   // clear memory token
+
+    setLoading(false);
+
+    navigate("/signin", { replace: true });
+  }
+};
   return (
     <aside
       onClick={() => !isOpen && setIsOpen(true)}
@@ -41,21 +63,15 @@ function Sidebar({ isOpen, setIsOpen }) {
     >
       {/* HEADER */}
       <div className="flex items-center justify-between px-4 py-5">
-
-        {/* Logo wrapper (ONLY this triggers preview) */}
-        <div
-          className="flex items-center gap-3"
-        >
-          <img src={logo}/>
-          {/* <FaRobot size={26} className="text-primary shrink-0" /> */}
-          
+        <div className="flex items-center gap-3">
+          <img src={logo} alt="logo" className="w-28 object-contain" />
         </div>
 
         {expanded && (
           <button
             onClick={(e) => {
               e.stopPropagation();
-              setIsOpen(!isOpen);
+              setIsOpen(false);
             }}
             className="p-2 rounded-md hover:bg-gray-100 transition"
           >
@@ -114,9 +130,7 @@ function Sidebar({ isOpen, setIsOpen }) {
 
           {expanded && (
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold truncate">
-                Jenny Wilson
-              </p>
+              <p className="text-sm font-semibold truncate">Jenny Wilson</p>
               <p className="text-xs text-gray-400 truncate">
                 jen.wilson@example.com
               </p>
@@ -126,13 +140,17 @@ function Sidebar({ isOpen, setIsOpen }) {
 
         {expanded && (
           <button
-            onClick={(e) => e.stopPropagation()}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleLogout();
+            }}
+            disabled={loading}
             className="mt-4 w-full flex items-center justify-center gap-2
               py-2.5 text-sm font-medium
               rounded-lg bg-gray-100 hover:bg-gray-200 transition"
           >
             <IoLogOutOutline size={20} />
-            Log out
+            {loading ? "Logging out..." : "Log out"}
           </button>
         )}
       </div>

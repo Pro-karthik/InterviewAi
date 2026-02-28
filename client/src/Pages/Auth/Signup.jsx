@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import AuthLayout from "./Components/AuthLayout";
 import AuthFormWrapper from "./Components/AuthFormWrapper";
 import OauthButtons from "./Components/OauthButtons";
@@ -7,65 +7,106 @@ import { GoLock } from "react-icons/go";
 import { Link, useNavigate } from "react-router-dom";
 import { registerUser } from "../../api/auth.api";
 import { useAuth } from "../../context/AuthContext";
+import { toast } from "react-toastify";
 
 function Signup() {
   const navigate = useNavigate();
- const { accessToken, setAccessToken } = useAuth();
-   if (accessToken) {
-     navigate("/dashboard");
-   }
+  const { accessToken, setAccessToken } = useAuth();
 
   const [formData, setFormData] = useState({
     email: "",
     password: "",
-    confirmPassword: ""
+    confirmPassword: "",
   });
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  // ✅ Redirect safely
+  useEffect(() => {
+    if (accessToken) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [accessToken, navigate]);
+
   const handleChange = (e) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     }));
+  };
+
+  // ✅ Clean Toast Handler
+  const handleToast = useCallback((message, type = "error") => {
+    if (!message) return;
+
+    const options = {
+      className: "rounded-lg shadow-lg",
+      progressClassName: "bg-white",
+    };
+
+    if (type === "success") {
+      toast.success(message, options);
+    } else {
+      toast.error(message, options);
+    }
+  }, []);
+
+  const validateForm = () => {
+    if (!formData.email || !formData.password || !formData.confirmPassword) {
+      return "All fields are required";
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      return "Passwords do not match";
+    }
+
+    if (formData.password.length < 6) {
+      return "Password must be at least 6 characters";
+    }
+
+    return null;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
 
-    if (!formData.email || !formData.password || !formData.confirmPassword) {
-      setError("All fields are required");
-      return;
-    }
-
-    if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match");
+    const validationError = validateForm();
+    if (validationError) {
+      setError(validationError);
+      handleToast(validationError);
       return;
     }
 
     try {
       setLoading(true);
+      setError("");
 
       const { data } = await registerUser({
         email: formData.email,
-        password: formData.password
+        password: formData.password,
       });
 
-      // Store access token in memory
       setAccessToken(data.accessToken);
 
-      // Redirect to dashboard
-      navigate("/dashboard");
+      handleToast("Account created successfully", "success");
+
+      navigate("/dashboard", { replace: true });
 
     } catch (err) {
-      setError(
-        err.response?.data?.message || "Signup failed"
-      );
-    } finally {
-      setLoading(false);
-    }
+  let message =
+    err?.response?.data?.message ||
+    "Registration failed. Please try again.";
+
+  if (Array.isArray(message)) {
+    message = message[0];
+  }
+
+  setError(message);
+  handleToast(message, "error");
+} finally {
+  setLoading(false);
+}
   };
 
   return (
@@ -76,12 +117,6 @@ function Signup() {
           Create your account to get started
         </p>
 
-        {error && (
-          <div className="text-red-500 text-sm text-center mb-2">
-            {error}
-          </div>
-        )}
-
         <form className="space-y-4" onSubmit={handleSubmit}>
           <div className="relative">
             <AiOutlineUser className="absolute left-3 top-1/2 -translate-y-1/2" />
@@ -91,7 +126,7 @@ function Signup() {
               placeholder="Email"
               value={formData.email}
               onChange={handleChange}
-              className="rounded-md w-full p-3 pl-10 placeholder:text-black bg-orange-50 focus:outline-none focus:ring-2 focus:ring-orange-400"
+              className="rounded-md w-full p-3 pl-10 bg-orange-50 focus:outline-none focus:ring-2 focus:ring-orange-400"
             />
           </div>
 
@@ -103,7 +138,7 @@ function Signup() {
               placeholder="Password"
               value={formData.password}
               onChange={handleChange}
-              className="rounded-xl p-3 w-full pl-10 placeholder:text-black bg-orange-50 focus:outline-none focus:ring-2 focus:ring-orange-400"
+              className="rounded-xl p-3 w-full pl-10 bg-orange-50 focus:outline-none focus:ring-2 focus:ring-orange-400"
             />
           </div>
 
@@ -115,7 +150,7 @@ function Signup() {
               placeholder="Confirm Password"
               value={formData.confirmPassword}
               onChange={handleChange}
-              className="rounded-xl p-3 pl-10 w-full placeholder:text-black bg-orange-50 focus:outline-none focus:ring-2 focus:ring-orange-400"
+              className="rounded-xl p-3 pl-10 w-full bg-orange-50 focus:outline-none focus:ring-2 focus:ring-orange-400"
             />
           </div>
 
@@ -127,7 +162,7 @@ function Signup() {
             {loading ? "Creating Account..." : "Sign Up"}
           </button>
 
-          <div className="block text-center text-sm">
+          <div className="text-center text-sm">
             Already have an account?
             <Link to="/signin" className="text-blue-500 ml-1">
               Sign In
