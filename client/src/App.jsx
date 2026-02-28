@@ -3,13 +3,14 @@ import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import SignIn from './Pages/Auth/SignIn'
 import SignUp from './Pages/Auth/Signup'
+import MainLayout from './Layouts/MainLayout'
 import './App.css'
 import Landing from './pages/Landing/Landing'
 function App() {
 
   return (
-    <>
-    </>
+   <>
+   </>
   )
 
 }
