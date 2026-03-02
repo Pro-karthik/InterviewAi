@@ -21,8 +21,17 @@ export const authenticate = (req, res, next) => {
   }
 };
 
-export const loginRatelimiter=ratelimit({
-    windowMs:15*60*1000,
-    max:5,
-    message:{success:false,message:'Too many login attempts, please try again later'}
+export const loginRateLimiter = ratelimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5, 
+  standardHeaders: true,
+  legacyHeaders: false,
+
+  keyGenerator: (req) => {
+    return req.body.email 
+  },
+  message: {
+    success: false,
+    message: "Too many login attempts for this account. Please try again later.",
+  },
 });
