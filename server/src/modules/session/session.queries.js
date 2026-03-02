@@ -297,21 +297,10 @@ export const getSessionHistory = async (client, userId) => {
       i.experience_level,
       i.status,
       i.created_at,
-      i.terminated_at,
-      i.termination_reason,
-      i.terminated_by_system,
-      i.overall_score AS session_overall_score,
-      i.risk_score,
-      i.risk_level,
 
-      sa.malpractice_flag,
-      sa.malpractice_summary,
-      sa.overall_score AS analysis_overall_score,
-      sa.technical_avg,
-      sa.depth_avg,
-      sa.clarity_avg,
-      sa.problem_solving_avg,
-      sa.communication_avg
+      COALESCE(sa.overall_score, i.overall_score) AS overall_score,
+      i.risk_level,
+      COALESCE(sa.malpractice_flag, false) AS malpractice_flag
 
     FROM interview_sessions i
     LEFT JOIN session_analysis sa
@@ -329,23 +318,42 @@ export const getSessionHistory = async (client, userId) => {
     experienceLevel: row.experience_level,
     status: row.status,
     createdAt: row.created_at,
-    terminatedAt: row.terminated_at,
-    terminationReason: row.termination_reason,
-    terminatedBySystem: row.terminated_by_system,
-
-    overallScore: row.analysis_overall_score ?? row.session_overall_score,
-    riskScore: row.risk_score,
+    overallScore: row.overall_score,
     riskLevel: row.risk_level,
-
-    malpractice: row.malpractice_flag ?? false,
-    malpracticeSummary: row.malpractice_summary,
-
-    breakdown: {
-      technical: row.technical_avg,
-      depth: row.depth_avg,
-      clarity: row.clarity_avg,
-      problemSolving: row.problem_solving_avg,
-      communication: row.communication_avg
-    }
+    malpractice: row.malpractice_flag
   }));
+};
+
+export const getSessionHistoryById = async (client, userId, sessionId) => {
+  const result = await client.query(
+    `
+    SELECT
+      i.id AS session_id,
+      i.skill,              
+      i.experience_level,
+      i.status,
+      i.created_at,
+      i.terminated_at,
+      i.termination_reason,
+      i.terminated_by_system,
+      i.overall_score AS session_overall_score,
+      i.risk_score,
+      i.risk_level,
+      sa.malpractice_flag,
+      sa.malpractice_summary,
+      sa.overall_score AS analysis_overall_score,
+      sa.technical_avg,
+      sa.depth_avg,
+      sa.clarity_avg,
+      sa.problem_solving_avg,
+      sa.communication_avg
+    FROM interview_sessions i
+    LEFT JOIN session_analysis sa
+      ON i.id = sa.session_id
+    WHERE i.user_id = $1 AND i.id = $2
+    `,
+    [userId, sessionId]
+  );
+  
+  return result.rows[0] || null;
 };

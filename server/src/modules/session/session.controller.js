@@ -3,7 +3,8 @@ import {
   submitAnswersService,
   evaluateSessionService,
   getSessionService,
-  getSessionHistoryService
+  getSessionHistoryService,
+  getSessionHistoryByIdService
 } from "./session.service.js";
 
 
@@ -98,3 +99,15 @@ export const getSessionHistory = async (req, res, next) => {
     next(err);
   } 
 };
+
+export const getSessionHistoryById = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const sessionId = req.params.id;
+    const result = await getSessionHistoryByIdService(userId, sessionId);
+    res.status(200).json(result);
+  }
+  catch(err){
+    next(err);
+  }
+}

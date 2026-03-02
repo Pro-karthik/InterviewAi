@@ -297,7 +297,23 @@ export async function getSessionHistoryService(userId) {
     client.release();
   }
 }
-  
+
+export async function getSessionHistoryByIdService(userId, sessionId) {
+  const client = await pool.connect();
+  try {
+    const session = await queries.getSessionById(client, sessionId);
+    if (!session) {
+      throw new Error("Session not found");
+    }
+    if (session.user_id !== userId) {
+      throw new Error("Unauthorized");
+    }
+    const result = await queries.getSessionHistoryById(client, userId, sessionId);
+    return result;
+  } finally {
+    client.release();
+  }
+}
 
 
 function calculateAverages(answers) {
