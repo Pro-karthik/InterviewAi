@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";  // ✅ Added Link
+import React, { useState, useMemo } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import logo from "../assets/logo.png";
 import { GoPlus } from "react-icons/go";
 import { MdOutlineDashboard } from "react-icons/md";
@@ -18,30 +18,96 @@ const navItems = [
   { icon: MdOutlineDashboard, label: "Overview", url: "/dashboard" },
   { icon: IoTimeOutline, label: "History", url: "/history" },
   { icon: HiOutlineDocumentText, label: "Statistics", url: "/statistics" },
-  { icon: IoNotificationsOutline, label: "Notifications", url: "/notifications" },
+  {
+    icon: IoNotificationsOutline,
+    label: "Notifications",
+    url: "/notifications",
+  },
   { icon: IoSettingsOutline, label: "Settings", url: "/settings" },
 ];
 
 function Sidebar({ isOpen, setIsOpen }) {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
+  const location = useLocation();
+  const { user, loading, setAccessToken, setUser } = useAuth();
+
+  const [loggingOut, setLoggingOut] = useState(false);
+
   const expanded = isOpen;
-  const { setAccessToken } = useAuth();
+  console.log(user);
+
+  const getInitial = (email = "") => {
+    return email.charAt(0).toUpperCase() || "U";
+  };
+
+  const getColorFromString = (str = "") => {
+    const colors = [
+      "bg-red-500",
+      "bg-blue-500",
+      "bg-green-500",
+      "bg-purple-500",
+      "bg-pink-500",
+      "bg-yellow-500",
+      "bg-indigo-500",
+    ];
+
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    }
+
+    return colors[Math.abs(hash) % colors.length];
+  };
 
   const handleLogout = async () => {
-    if (loading) return;
-    setLoading(true);
+    if (loggingOut) return;
+    setLoggingOut(true);
 
     try {
-      await logout(); // clears refresh cookie on backend
-    } catch (error) {
-      console.error("Logout API error:", error?.response?.data || error.message);
+      await logout();
+    } catch (err) {
+      console.error("Logout failed:", err?.response?.data || err.message);
     } finally {
-      setAccessToken(null); // clear memory token
-      setLoading(false);
+      setAccessToken(null);
+      setUser(null);
       navigate("/signin", { replace: true });
     }
   };
+
+  const extractNameFromEmail = (email) => {
+    if (!email) return "User";
+
+    const username = email.split("@")[0]; // bharath.chettu
+    const parts = username.split(/[._-]/); // split by ., _, -
+
+    return parts
+      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+      .join(" ");
+  };
+
+  const renderedNav = useMemo(() => {
+    return navItems.map((item, index) => {
+      const Icon = item.icon;
+      const isActive = location.pathname === item.url;
+
+      return (
+        <Link
+          key={index}
+          to={item.url}
+          onClick={(e) => e.stopPropagation()}
+          className={`flex items-center
+            ${expanded ? "gap-3 px-4 justify-start" : "justify-center"}
+            py-2.5 text-sm font-medium rounded-lg transition
+            ${isActive ? "bg-gray-200 text-primary" : "hover:bg-gray-100"}`}
+        >
+          <Icon size={20} />
+          {expanded && <span>{item.label}</span>}
+        </Link>
+      );
+    });
+  }, [expanded, location.pathname]);
+
+  if (loading) return null; // prevent flicker before auth loads
 
   return (
     <aside
@@ -88,44 +154,30 @@ function Sidebar({ isOpen, setIsOpen }) {
 
       {/* NAVIGATION */}
       <div className="flex-1 overflow-y-auto mt-6 px-2">
-        <nav className="flex flex-col gap-1">
-          {navItems.map((item, index) => {
-            const Icon = item.icon;
-            return (
-              <Link
-                key={index}
-                to={item.url}   // ✅ Navigate using Link
-                onClick={(e) => e.stopPropagation()}
-                className={`flex items-center
-                  ${expanded ? "gap-3 px-4 justify-start" : "justify-center"}
-                  py-2.5 text-sm font-medium
-                  rounded-lg hover:bg-gray-100 transition`}
-              >
-                <Icon size={20} />
-                {expanded && <span>{item.label}</span>}
-              </Link>
-            );
-          })}
-        </nav>
+        <nav className="flex flex-col gap-1">{renderedNav}</nav>
       </div>
 
-      {/* PROFILE */}
+      {/* PROFILE SECTION */}
       <div className="px-3 py-4 border-t border-gray-200">
         <div
-          className={`flex items-center
-            ${expanded ? "gap-3" : "justify-center"}`}
+          className={`flex items-center ${
+            expanded ? "gap-3" : "justify-center"
+          }`}
         >
-          <img
-            src="https://i.pravatar.cc/40"
-            alt="profile"
-            className="w-9 h-9 rounded-full"
-          />
-
+          <div
+            className={`w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-semibold ${getColorFromString(
+              user?.email || "user",
+            )}`}
+          >
+            {getInitial(user?.email)}
+          </div>
           {expanded && (
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold truncate">Jenny Wilson</p>
+              <p className="text-sm font-semibold truncate">
+                {user?.name || extractNameFromEmail(user?.email)}
+              </p>
               <p className="text-xs text-gray-400 truncate">
-                jen.wilson@example.com
+                {user?.email || ""}
               </p>
             </div>
           )}
@@ -137,13 +189,14 @@ function Sidebar({ isOpen, setIsOpen }) {
               e.stopPropagation();
               handleLogout();
             }}
-            disabled={loading}
+            disabled={loggingOut}
             className="mt-4 w-full flex items-center justify-center gap-2
               py-2.5 text-sm font-medium
-              rounded-lg bg-gray-100 hover:bg-gray-200 transition"
+              rounded-lg bg-gray-100 hover:bg-gray-200 transition
+              disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <IoLogOutOutline size={20} />
-            {loading ? "Logging out..." : "Log out"}
+            {loggingOut ? "Logging out..." : "Log out"}
           </button>
         )}
       </div>
