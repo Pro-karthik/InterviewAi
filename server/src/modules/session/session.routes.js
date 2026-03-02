@@ -16,6 +16,9 @@ router.post("/:id/evaluate", authenticate, sessionController.evaluateSession);
 // history
 router.get("/history", authenticate, sessionController.getSessionHistory);
 
+//history by id
+router.get("/history/:id", authenticate, sessionController.getSessionHistoryById);
+
 // Get Session
 router.get("/:id", authenticate, sessionController.getSession);
 
