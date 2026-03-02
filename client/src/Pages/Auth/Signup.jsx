@@ -126,7 +126,7 @@ function Signup() {
               placeholder="Email"
               value={formData.email}
               onChange={handleChange}
-              className="rounded-md w-full p-3 pl-10 bg-orange-50 focus:outline-none focus:ring-2 focus:ring-orange-400"
+              className="rounded-md w-full p-3 pl-10 bg-orange-50 focus:outline-none focus:ring-2 focus:ring-orange-400 placeholder:text-black"
             />
           </div>
 
@@ -138,7 +138,7 @@ function Signup() {
               placeholder="Password"
               value={formData.password}
               onChange={handleChange}
-              className="rounded-xl p-3 w-full pl-10 bg-orange-50 focus:outline-none focus:ring-2 focus:ring-orange-400"
+              className="rounded-xl p-3 w-full pl-10 bg-orange-50 focus:outline-none focus:ring-2 focus:ring-orange-400 placeholder:text-black"
             />
           </div>
 
@@ -150,7 +150,7 @@ function Signup() {
               placeholder="Confirm Password"
               value={formData.confirmPassword}
               onChange={handleChange}
-              className="rounded-xl p-3 pl-10 w-full bg-orange-50 focus:outline-none focus:ring-2 focus:ring-orange-400"
+              className="rounded-xl p-3 pl-10 w-full bg-orange-50 focus:outline-none focus:ring-2 focus:ring-orange-400 placeholder:text-black"
             />
           </div>
 
