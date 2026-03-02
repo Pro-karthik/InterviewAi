@@ -1,44 +1,92 @@
 import { Calendar } from "lucide-react";
 import ScoreRing from "./Scoring";
 
-export default function SessionHeader({ session }) {
-  return (
-    <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6 flex items-center justify-between">
+/* --------------------------
+   Badge Helpers
+--------------------------- */
 
-      {/* LEFT - Score */}
+const getRiskBadge = (riskLevel) => {
+  switch (riskLevel?.toLowerCase()) {
+    case "low":
+      return "bg-green-50 text-green-600";
+    case "medium":
+      return "bg-yellow-50 text-yellow-600";
+    case "high":
+      return "bg-red-50 text-red-600";
+    default:
+      return "bg-gray-100 text-gray-600";
+  }
+};
+
+const getStatusBadge = (status) => {
+  switch (status?.toLowerCase()) {
+    case "evaluated":
+      return "bg-blue-100 text-blue-700";
+    case "terminated":
+      return "bg-red-100 text-red-700";
+    case "in_progress":
+      return "bg-yellow-100 text-yellow-700";
+    default:
+      return "bg-gray-100 text-gray-700";
+  }
+};
+
+export default function SessionHeader({ session }) {
+  const formattedDate = new Date(session.createdAt).toLocaleDateString(
+    "en-IN",
+    {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    }
+  );
+
+  return (
+    <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 flex items-center justify-between">
+
+      {/* LEFT - Score Section */}
       <div className="flex items-center gap-6">
-        {/* <div className="relative w-28 h-28">
-          <div className="absolute inset-0 rounded-full border-[10px] border-blue-100"></div>
-          <div className="absolute inset-0 rounded-full border-[10px] border-primary border-t-transparent rotate-45"></div>
-          <div className="absolute inset-0 flex items-center justify-center text-4xl font-bold text-primary">
-            {session.overallScore}
-          </div>
-          
-        </div> */}
-        <ScoreRing  score = {session.overallScore}/>
+
+        <ScoreRing score={session.overallScore} />
 
         <div>
-          <span className="px-3 py-1 text-sm rounded-full bg-green-50 text-green-600 font-medium">
-            Low Risk
+          {/* Risk Badge */}
+          <span
+            className={`px-3 py-1 text-sm rounded-full font-medium ${getRiskBadge(
+              session.riskLevel
+            )}`}
+          >
+            {session.riskLevel || "Unknown"} Risk
           </span>
-          <h2 className="text-2xl font-semibold mt-2">Overall Score</h2>
-          <p className="text-gray-500 text-sm">
+
+          <h2 className="text-2xl font-semibold mt-3 text-text-primary">
+            Overall Score
+          </h2>
+
+          <p className="text-text-secondary text-sm mt-1">
             Skill: {session.skill}
           </p>
-          <p className="text-gray-500 text-sm">
+
+          <p className="text-text-secondary text-sm">
             Experience: {session.experienceLevel}
           </p>
         </div>
       </div>
 
       {/* RIGHT - Status + Date */}
-      <div className="text-right space-y-2">
-        <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm">
-          Evaluated
+      <div className="text-right space-y-3">
+
+        <span
+          className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusBadge(
+            session.status
+          )}`}
+        >
+          {session.status}
         </span>
-        <div className="flex items-center gap-2 text-gray-500 justify-end">
+
+        <div className="flex items-center gap-2 text-text-secondary justify-end text-sm">
           <Calendar size={16} />
-          {session.createdAt}
+          {formattedDate}
         </div>
       </div>
     </div>

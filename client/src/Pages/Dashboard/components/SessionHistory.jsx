@@ -1,5 +1,4 @@
-import { useNavigate } from "react-router-dom";
-
+import { useNavigate, Link } from "react-router-dom";
 /* -------------------------
    Helpers
 -------------------------- */
@@ -43,7 +42,6 @@ const getStatusBadge = (status) => {
 -------------------------- */
 
 const SessionHistory = ({ sessions = [] }) => {
-  const navigate = useNavigate();
 
   if (!sessions.length) {
     return (
@@ -76,12 +74,10 @@ const SessionHistory = ({ sessions = [] }) => {
       <div className="max-h-96 overflow-y-auto space-y-4 pr-2">
 
         {sessions.map((session) => (
-          <div
+          <Link
             key={session.sessionId}
-            onClick={() =>
-              navigate(`/dashboard/session/${session.sessionId}`)
-            }
-            className="border rounded-md p-4 hover:bg-gray-50 cursor-pointer transition"
+            to={`/session/${session.sessionId}`}
+            className="block border rounded-md p-4 hover:bg-gray-50 cursor-pointer transition"
           >
 
             {/* Top Row */}
@@ -137,7 +133,7 @@ const SessionHistory = ({ sessions = [] }) => {
               </div>
             </div>
 
-          </div>
+          </Link>
         ))}
 
       </div>
