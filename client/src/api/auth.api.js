@@ -13,7 +13,7 @@ export const logoutUser = () =>
   axios.post("/users/logout");
 
 export const getProfile = async () => {
-  axios.get("/users/profile");
+  return axios.get("/users/profile");
 };
 
 export const logout = () =>

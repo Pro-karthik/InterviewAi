@@ -9,7 +9,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // 🔐 Attach token automatically to axios
+  // 🔐 Attach token automatically
   useEffect(() => {
     if (accessToken) {
       axios.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
@@ -18,31 +18,40 @@ export const AuthProvider = ({ children }) => {
     }
   }, [accessToken]);
 
-  // 🚀 Initialize authentication (Single clean effect)
+  // 🚀 Initialize auth once
   useEffect(() => {
+    let isMounted = true;
+
     const initializeAuth = async () => {
       try {
-        // 1️⃣ Refresh token
         const refreshRes = await refreshAccessToken();
-
         const newAccessToken = refreshRes?.data?.accessToken;
-        if (!newAccessToken) throw new Error("No access token returned");
+
+        if (!newAccessToken) throw new Error("No access token");
+
+        if (!isMounted) return;
 
         setAccessToken(newAccessToken);
 
-        // 2️⃣ Fetch user profile
         const profileRes = await getProfile();
-        setUser(profileRes?.data?.user || null);
+        if (!isMounted) return;
 
-      } catch (error) {
-        setAccessToken(null);
-        setUser(null);
+        setUser(profileRes.data);   // ✅ correct
+      } catch (err) {
+        if (isMounted) {
+          setAccessToken(null);
+          setUser(null);
+        }
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
 
     initializeAuth();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   return (
