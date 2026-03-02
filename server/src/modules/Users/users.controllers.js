@@ -36,22 +36,22 @@ export const loginController = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
-    const { accessToken, refreshToken } =
+    const { accessToken, refreshToken, user } =
       await loginUser(email, password);
 
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: false,
       sameSite: "lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    res.json({ accessToken });
+   res.status(200).json(user);
 
   } catch (error) {
     res.status(error.statusCode || 500).json({
-      success:false,
-      message:error.message,
+      success: false,
+      message: error.message,
     });
     next();
   }

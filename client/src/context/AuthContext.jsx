@@ -1,43 +1,57 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import axios from "../api/axios";
-import { refreshAccessToken } from "../api/auth.api";
+import { refreshAccessToken, getProfile } from "../api/auth.api";
 
-const AuthContext = createContext();
+const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [accessToken, setAccessToken] = useState(null);
+  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Attach token automatically
+  // 🔐 Attach token automatically to axios
   useEffect(() => {
     if (accessToken) {
-      axios.defaults.headers.Authorization = `Bearer ${accessToken}`;
+      axios.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
     } else {
-      delete axios.defaults.headers.Authorization;
+      delete axios.defaults.headers.common["Authorization"];
     }
   }, [accessToken]);
 
-  // Silent refresh on app load
+  // 🚀 Initialize authentication (Single clean effect)
   useEffect(() => {
-    const tryRefresh = async () => {
+    const initializeAuth = async () => {
       try {
-        const { data } = await refreshAccessToken();
-        setAccessToken(data.accessToken);
-      } catch (err) {
+        // 1️⃣ Refresh token
+        const refreshRes = await refreshAccessToken();
+
+        const newAccessToken = refreshRes?.data?.accessToken;
+        if (!newAccessToken) throw new Error("No access token returned");
+
+        setAccessToken(newAccessToken);
+
+        // 2️⃣ Fetch user profile
+        const profileRes = await getProfile();
+        setUser(profileRes?.data?.user || null);
+
+      } catch (error) {
         setAccessToken(null);
+        setUser(null);
       } finally {
         setLoading(false);
       }
     };
 
-    tryRefresh();
+    initializeAuth();
   }, []);
 
   return (
     <AuthContext.Provider
       value={{
         accessToken,
+        user,
         setAccessToken,
+        setUser,
         loading,
       }}
     >

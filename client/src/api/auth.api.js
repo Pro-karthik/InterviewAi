@@ -12,5 +12,9 @@ export const refreshAccessToken = () =>
 export const logoutUser = () =>
   axios.post("/users/logout");
 
+export const getProfile = async () => {
+  axios.get("/users/profile");
+};
+
 export const logout = () =>
   axios.post('/users/logout');
