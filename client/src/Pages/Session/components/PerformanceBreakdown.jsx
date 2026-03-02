@@ -2,26 +2,40 @@ import RadarChartComponent from "./RadarChartComponent";
 import SkillCard from "./SkillCard";
 
 export default function PerformanceBreakdown({ breakdown }) {
+  if (!breakdown) return null;
 
   const skills = [
-    { title: "Technical", value: breakdown.technical },
-    { title: "Depth", value: breakdown.depth },
-    { title: "Clarity", value: breakdown.clarity },
-    { title: "Problem Solving", value: breakdown.problemSolving },
-    { title: "Communication", value: breakdown.communication },
-  ];
+    { title: "Technical", value: breakdown.technical ?? 0 },
+    { title: "Depth", value: breakdown.depth ?? 0 },
+    { title: "Clarity", value: breakdown.clarity ?? 0 },
+    { title: "Problem Solving", value: breakdown.problemSolving ?? 0 },
+    { title: "Communication", value: breakdown.communication ?? 0 },
+  ].map(skill => ({
+    ...skill,
+    value: Math.min(Math.max(skill.value, 0), 10), // clamp 0–10
+  }));
 
   const lowest = skills.reduce((prev, curr) =>
     curr.value < prev.value ? curr : prev
   );
 
   return (
-    <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6 space-y-6">
-      <h3 className="text-lg font-semibold">Performance Breakdown</h3>
+    <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 space-y-8">
 
-      <RadarChartComponent data={skills} />
+      <div>
+        <h3 className="text-lg font-semibold text-text-primary">
+          Performance Breakdown
+        </h3>
+        <p className="text-sm text-text-secondary mt-1">
+          Detailed evaluation across key skill dimensions
+        </p>
+      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="pt-2">
+        <RadarChartComponent data={skills} />
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
         {skills.map((skill) => (
           <SkillCard
             key={skill.title}
@@ -30,6 +44,7 @@ export default function PerformanceBreakdown({ breakdown }) {
           />
         ))}
       </div>
+
     </div>
   );
 }

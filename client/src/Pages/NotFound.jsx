@@ -19,7 +19,7 @@ const NotFound = () => {
 
       {/* Action */}
       <Link
-        to="/"
+        to="/dashboard"
         className="px-5 py-2 rounded-md bg-[#4D2C5E] text-white font-medium hover:bg-[#3a2045] transition-colors"
       >
         Back to Home

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";  // ✅ Added Link
 import logo from "../assets/logo.png";
 import { GoPlus } from "react-icons/go";
 import { MdOutlineDashboard } from "react-icons/md";
@@ -11,46 +11,38 @@ import {
   IoMenu,
 } from "react-icons/io5";
 import { HiOutlineDocumentText } from "react-icons/hi";
-import {logout} from '../api/auth.api'
+import { logout } from "../api/auth.api";
 import { useAuth } from "../context/AuthContext";
 
 const navItems = [
-  { icon: MdOutlineDashboard, label: "Overview" },
-  { icon: IoTimeOutline, label: "History" },
-  { icon: HiOutlineDocumentText, label: "Statistics" },
-  { icon: IoNotificationsOutline, label: "Notifications" },
-  { icon: IoSettingsOutline, label: "Settings" },
+  { icon: MdOutlineDashboard, label: "Overview", url: "/dashboard" },
+  { icon: IoTimeOutline, label: "History", url: "/history" },
+  { icon: HiOutlineDocumentText, label: "Statistics", url: "/statistics" },
+  { icon: IoNotificationsOutline, label: "Notifications", url: "/notifications" },
+  { icon: IoSettingsOutline, label: "Settings", url: "/settings" },
 ];
 
 function Sidebar({ isOpen, setIsOpen }) {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-
   const expanded = isOpen;
+  const { setAccessToken } = useAuth();
 
- const { setAccessToken } = useAuth();
+  const handleLogout = async () => {
+    if (loading) return;
+    setLoading(true);
 
-const handleLogout = async () => {
-  if (loading) return;
+    try {
+      await logout(); // clears refresh cookie on backend
+    } catch (error) {
+      console.error("Logout API error:", error?.response?.data || error.message);
+    } finally {
+      setAccessToken(null); // clear memory token
+      setLoading(false);
+      navigate("/signin", { replace: true });
+    }
+  };
 
-  setLoading(true);
-
-  try {
-    await logout(); // clears refresh cookie on backend
-  } catch (error) {
-    console.error(
-      "Logout API error:",
-      error?.response?.data || error.message
-    );
-  } finally {
-    
-    setAccessToken(null);   // clear memory token
-
-    setLoading(false);
-
-    navigate("/signin", { replace: true });
-  }
-};
   return (
     <aside
       onClick={() => !isOpen && setIsOpen(true)}
@@ -100,8 +92,9 @@ const handleLogout = async () => {
           {navItems.map((item, index) => {
             const Icon = item.icon;
             return (
-              <button
+              <Link
                 key={index}
+                to={item.url}   // ✅ Navigate using Link
                 onClick={(e) => e.stopPropagation()}
                 className={`flex items-center
                   ${expanded ? "gap-3 px-4 justify-start" : "justify-center"}
@@ -110,7 +103,7 @@ const handleLogout = async () => {
               >
                 <Icon size={20} />
                 {expanded && <span>{item.label}</span>}
-              </button>
+              </Link>
             );
           })}
         </nav>
