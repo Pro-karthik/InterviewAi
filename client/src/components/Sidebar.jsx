@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import logo from "../assets/logo.png";
 import { GoPlus } from "react-icons/go";
@@ -11,34 +11,41 @@ import {
   IoMenu,
 } from "react-icons/io5";
 import { HiOutlineDocumentText } from "react-icons/hi";
-import { logout } from "../api/auth.api";
 import { useAuth } from "../context/AuthContext";
 
 const navItems = [
   { icon: MdOutlineDashboard, label: "Overview", url: "/dashboard" },
   { icon: IoTimeOutline, label: "History", url: "/history" },
   { icon: HiOutlineDocumentText, label: "Statistics", url: "/statistics" },
-  {
-    icon: IoNotificationsOutline,
-    label: "Notifications",
-    url: "/notifications",
-  },
+  { icon: IoNotificationsOutline, label: "Notifications", url: "/notifications" },
   { icon: IoSettingsOutline, label: "Settings", url: "/settings" },
 ];
 
 function Sidebar({ isOpen, setIsOpen }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, loading, setAccessToken, setUser } = useAuth();
+  const { user, loading, logout } = useAuth();
 
   const [loggingOut, setLoggingOut] = useState(false);
 
   const expanded = isOpen;
-  console.log(user);
 
-  const getInitial = (email = "") => {
-    return email.charAt(0).toUpperCase() || "U";
-  };
+  // ✅ Proper logout handler
+  const handleLogout = useCallback(async () => {
+    try {
+      setLoggingOut(true);
+      await logout(); // call context logout (should clear auth + tokens)
+      
+      navigate("/signin", { replace: true });
+    } catch (error) {
+      console.error("Logout failed:", error);
+    } finally {
+      setLoggingOut(false);
+    }
+  }, [logout, navigate]);
+
+  const getInitial = (email = "") =>
+    email?.charAt(0).toUpperCase() || "U";
 
   const getColorFromString = (str = "") => {
     const colors = [
@@ -59,26 +66,10 @@ function Sidebar({ isOpen, setIsOpen }) {
     return colors[Math.abs(hash) % colors.length];
   };
 
-  const handleLogout = async () => {
-    if (loggingOut) return;
-    setLoggingOut(true);
-
-    try {
-      await logout();
-    } catch (err) {
-      console.error("Logout failed:", err?.response?.data || err.message);
-    } finally {
-      setAccessToken(null);
-      setUser(null);
-      navigate("/signin", { replace: true });
-    }
-  };
-
   const extractNameFromEmail = (email) => {
     if (!email) return "User";
-
-    const username = email.split("@")[0]; // bharath.chettu
-    const parts = username.split(/[._-]/); // split by ., _, -
+    const username = email.split("@")[0];
+    const parts = username.split(/[._-]/);
 
     return parts
       .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
@@ -98,7 +89,11 @@ function Sidebar({ isOpen, setIsOpen }) {
           className={`flex items-center
             ${expanded ? "gap-3 px-4 justify-start" : "justify-center"}
             py-2.5 text-sm font-medium rounded-lg transition
-            ${isActive ? "bg-gray-200 text-primary" : "hover:bg-gray-100"}`}
+            ${
+              isActive
+                ? "bg-gray-200 text-primary"
+                : "hover:bg-gray-100"
+            }`}
         >
           <Icon size={20} />
           {expanded && <span>{item.label}</span>}
@@ -107,7 +102,7 @@ function Sidebar({ isOpen, setIsOpen }) {
     });
   }, [expanded, location.pathname]);
 
-  if (loading) return null; // prevent flicker before auth loads
+  if (loading) return null;
 
   return (
     <aside
@@ -116,14 +111,11 @@ function Sidebar({ isOpen, setIsOpen }) {
         ${expanded ? "w-72" : "w-16"}
         bg-white border-r border-gray-200
         flex flex-col transition-all duration-300
-        ${!isOpen ? "cursor-pointer" : ""}
-      `}
+        ${!isOpen ? "cursor-pointer" : ""}`}
     >
       {/* HEADER */}
       <div className="flex items-center justify-between px-4 py-5">
-        <div className="flex items-center gap-3">
-          <img src={logo} alt="logo" className="w-28 object-contain" />
-        </div>
+        <img src={logo} alt="logo" className="w-28 object-contain" />
 
         {expanded && (
           <button
@@ -166,11 +158,12 @@ function Sidebar({ isOpen, setIsOpen }) {
         >
           <div
             className={`w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-semibold ${getColorFromString(
-              user?.email || "user",
+              user?.email || "user"
             )}`}
           >
             {getInitial(user?.email)}
           </div>
+
           {expanded && (
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold truncate">

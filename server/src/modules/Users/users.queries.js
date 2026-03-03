@@ -34,3 +34,45 @@ export const revokeAllUserTokensQuery = `
   SET is_revoked = true
   WHERE user_id = $1
 `;
+export const getUserByEmailQuery = `
+  SELECT id, email, otp, otp_expires, otp_attempts, otp_block_until
+  FROM users
+  WHERE email = $1
+`;
+
+export const updateOtpQuery = `
+  UPDATE users
+  SET otp = $1,
+      otp_expires = $2,
+      otp_attempts = 0,
+      otp_block_until = NULL
+  WHERE email = $3
+`;
+
+export const updateOtpAttemptsQuery = `
+  UPDATE users
+  SET otp_attempts = $1
+  WHERE email = $2
+`;
+
+export const blockUserOtpQuery = `
+  UPDATE users
+  SET otp_attempts = $1,
+      otp_block_until = $2
+  WHERE email = $3
+`;
+
+export const clearOtpQuery = `
+  UPDATE users
+  SET otp = NULL,
+      otp_expires = NULL,
+      otp_attempts = 0,
+      otp_block_until = NULL
+  WHERE email = $1
+`;
+
+export const updatePasswordQuery = `
+  UPDATE users
+  SET password = $1
+  WHERE email = $2
+`;

@@ -3,7 +3,10 @@ import {
   registerUser,
   refreshAccessToken,
   logoutUser,
-  getUserById
+  getUserById,
+  sendotpService,
+  verifyotpService,
+  resetPasswordService
 } from "./users.service.js";
 
 export const registerController = async (req, res, next) => {
@@ -91,6 +94,62 @@ export const logoutController = async (req, res, next) => {
     res.clearCookie("refreshToken");
     res.json({ message: "Logged out" });
 
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const sendotpController = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+
+    await sendotpService(email);
+
+    return res.status(200).json({
+      success: true,
+      message: "OTP sent successfully"
+    });
+
+  } catch (err) {
+    return next(err);
+  }
+};
+
+export const verifyotpController = async (req, res, next) => {
+  try {
+    const { email, otp } = req.body;
+
+    if (!email || !otp) {
+      return res.status(400).json({
+        message: "Email and OTP are required",
+      });
+    }
+
+    await verifyotpService(email, otp);
+
+    return res.status(200).json({
+      message: "OTP verified successfully",
+    });
+
+  } catch (error) {
+    return next(error);
+  }
+};
+export const resetPasswordController = async (req, res, next) => {
+  try {
+    const { email, newPassword } = req.body;
+
+    if (!email || !newPassword) {
+      return res.status(400).json({
+        message: "Email and newPassword are required",
+      });
+    }
+
+    await resetPasswordService(email, newPassword);
+
+    res.status(200).json({
+      message: "Password updated successfully",
+    });
   } catch (err) {
     next(err);
   }

@@ -1,17 +1,17 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import AuthLayout from "./Components/AuthLayout";
 import AuthFormWrapper from "./Components/AuthFormWrapper";
 import { AiOutlineUser } from "react-icons/ai";
 import { GoLock } from "react-icons/go";
 import OauthButtons from "./Components/OauthButtons";
 import { Link, useNavigate } from "react-router-dom";
-import { loginUser } from "../../api/auth.api";
+import { loginUser, getProfile } from "../../api/auth.api"; // ✅ added getProfile
 import { useAuth } from "../../context/AuthContext";
 import { toast } from "react-toastify";
 
 function SignIn() {
   const navigate = useNavigate();
-  const { accessToken, setAccessToken } = useAuth();
+  const { accessToken, setAccessToken, setUser } = useAuth(); // ✅ added setUser
 
   const [formData, setFormData] = useState({
     email: "",
@@ -21,14 +21,12 @@ function SignIn() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // ✅ Redirect AFTER render
   useEffect(() => {
     if (accessToken) {
       navigate("/dashboard", { replace: true });
     }
   }, [accessToken, navigate]);
 
-  // ✅ Stable toast handler
   const handleToast = useCallback((message, type) => {
     if (!message) return;
 
@@ -56,7 +54,7 @@ function SignIn() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (loading) return; // prevent double submit
+    if (loading) return;
     setError("");
 
     if (!formData.email || !formData.password) {
@@ -70,13 +68,15 @@ function SignIn() {
 
       const { data } = await loginUser(formData);
 
-      // Store token in memory (context)
       setAccessToken(data.accessToken);
 
-      handleToast("Login Successful", "success");
-      navigate("/dashboard",{replace:true});
+      // ✅ FIX: fetch profile immediately
+      const profileRes = await getProfile();
+      setUser(profileRes.data);
 
-      // navigation handled by useEffect
+      handleToast("Login Successful", "success");
+      navigate("/dashboard", { replace: true });
+
     } catch (err) {
       const message =
         err?.response?.data?.message || "Login failed. Please try again.";
@@ -91,18 +91,11 @@ function SignIn() {
   return (
     <AuthLayout>
       <AuthFormWrapper>
-        <h3 className="text-xl font-bold font-fontFamily-heading mb-2 text-center">
-          LOGIN
-        </h3>
-
-        <p className="text-gray-600 text-center mb-4">
-          Enter your credentials to access your account
-        </p>
-
+        <h3 className="text-xl font-bold mb-2 text-center">LOGIN</h3>
 
         <form className="space-y-4" onSubmit={handleSubmit}>
           <div className="relative">
-            <AiOutlineUser className="absolute left-3 top-1/2 transform -translate-y-1/2 text-black-400" />
+            <AiOutlineUser className="absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="email"
               name="email"
@@ -114,7 +107,7 @@ function SignIn() {
           </div>
 
           <div className="relative">
-            <GoLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-black-400" />
+            <GoLock className="absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="password"
               name="password"
@@ -128,7 +121,7 @@ function SignIn() {
           <button
             type="submit"
             disabled={loading}
-            className="w-1/2 bg-gradient-to-r from-[#FF7A2F] via-[#FFC7A6] to-[#F4E6DA] text-white p-3 rounded-lg transition justify-center items-center mx-auto block disabled:opacity-50"
+            className="w-full bg-gradient-to-r from-[#FF7A2F] via-[#FFC7A6] to-[#F4E6DA] text-white p-3 rounded-lg transition justify-center items-center mx-auto block disabled:opacity-50"
           >
             {loading ? "Signing In..." : "Sign In"}
           </button>
@@ -140,10 +133,8 @@ function SignIn() {
             </Link>
           </div>
 
-          <p className="text-center mt-2">Login With others</p>
-
-          <div className="mt-2">
-            <OauthButtons />
+          <div className="text-center text-sm text-blue-500">
+            <Link to="/forgot">Forgot Password ? </Link>
           </div>
         </form>
       </AuthFormWrapper>

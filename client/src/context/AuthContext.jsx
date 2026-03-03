@@ -1,22 +1,23 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import axios from "../api/axios";
-import { refreshAccessToken, getProfile } from "../api/auth.api";
+import { refreshAccessToken, getProfile, logout as logoutApi } from "../api/auth.api";
 
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  const [accessToken, setAccessToken] = useState(null);
+  const [accessToken, setAccessTokenState] = useState(null);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // 🔐 Attach token automatically
-  useEffect(() => {
-    if (accessToken) {
-      axios.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
+  // 🔐 Safe token setter (clears header properly)
+  const setAccessToken = (token) => {
+    if (token) {
+      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
     } else {
       delete axios.defaults.headers.common["Authorization"];
     }
-  }, [accessToken]);
+    setAccessTokenState(token);
+  };
 
   // 🚀 Initialize auth once
   useEffect(() => {
@@ -27,7 +28,7 @@ export const AuthProvider = ({ children }) => {
         const refreshRes = await refreshAccessToken();
         const newAccessToken = refreshRes?.data?.accessToken;
 
-        if (!newAccessToken) throw new Error("No access token");
+        if (!newAccessToken) throw new Error("No token");
 
         if (!isMounted) return;
 
@@ -36,7 +37,7 @@ export const AuthProvider = ({ children }) => {
         const profileRes = await getProfile();
         if (!isMounted) return;
 
-        setUser(profileRes.data);   // ✅ correct
+        setUser(profileRes.data);
       } catch (err) {
         if (isMounted) {
           setAccessToken(null);
@@ -54,6 +55,16 @@ export const AuthProvider = ({ children }) => {
     };
   }, []);
 
+  // 🔴 Proper logout
+  const logout = async () => {
+    try {
+      await logoutApi(); // clears refresh cookie in backend
+    } catch (err) {}
+
+    setAccessToken(null);   // clears axios header
+    setUser(null);          // clears user
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -62,9 +73,10 @@ export const AuthProvider = ({ children }) => {
         setAccessToken,
         setUser,
         loading,
+        logout,
       }}
     >
-      {children}
+      {!loading && children}
     </AuthContext.Provider>
   );
 };

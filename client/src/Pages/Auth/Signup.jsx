@@ -1,17 +1,16 @@
 import React, { useState, useCallback, useEffect } from "react";
 import AuthLayout from "./Components/AuthLayout";
 import AuthFormWrapper from "./Components/AuthFormWrapper";
-import OauthButtons from "./Components/OauthButtons";
 import { AiOutlineUser } from "react-icons/ai";
 import { GoLock } from "react-icons/go";
 import { Link, useNavigate } from "react-router-dom";
-import { registerUser } from "../../api/auth.api";
+import { registerUser, getProfile } from "../../api/auth.api";
 import { useAuth } from "../../context/AuthContext";
 import { toast } from "react-toastify";
 
 function Signup() {
   const navigate = useNavigate();
-  const { accessToken, setAccessToken } = useAuth();
+  const { accessToken, setAccessToken, setUser } = useAuth();
 
   const [formData, setFormData] = useState({
     email: "",
@@ -22,7 +21,7 @@ function Signup() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // ✅ Redirect safely
+  // Redirect if already logged in
   useEffect(() => {
     if (accessToken) {
       navigate("/dashboard", { replace: true });
@@ -36,7 +35,6 @@ function Signup() {
     }));
   };
 
-  // ✅ Clean Toast Handler
   const handleToast = useCallback((message, type = "error") => {
     if (!message) return;
 
@@ -45,11 +43,9 @@ function Signup() {
       progressClassName: "bg-white",
     };
 
-    if (type === "success") {
-      toast.success(message, options);
-    } else {
-      toast.error(message, options);
-    }
+    type === "success"
+      ? toast.success(message, options)
+      : toast.error(message, options);
   }, []);
 
   const validateForm = () => {
@@ -57,12 +53,12 @@ function Signup() {
       return "All fields are required";
     }
 
-    if (formData.password !== formData.confirmPassword) {
-      return "Passwords do not match";
-    }
-
     if (formData.password.length < 6) {
       return "Password must be at least 6 characters";
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      return "Passwords do not match";
     }
 
     return null;
@@ -82,31 +78,36 @@ function Signup() {
       setLoading(true);
       setError("");
 
+      // 1️⃣ Register user
       const { data } = await registerUser({
         email: formData.email,
         password: formData.password,
       });
 
+      // 2️⃣ Store access token
       setAccessToken(data.accessToken);
+
+      // 3️⃣ Fetch user profile
+      const profileRes = await getProfile();
+      setUser(profileRes.data);
 
       handleToast("Account created successfully", "success");
 
       navigate("/dashboard", { replace: true });
-
     } catch (err) {
-  let message =
-    err?.response?.data?.message ||
-    "Registration failed. Please try again.";
+      let message =
+        err?.response?.data?.message ||
+        "Registration failed. Please try again.";
 
-  if (Array.isArray(message)) {
-    message = message[0];
-  }
+      if (Array.isArray(message)) {
+        message = message[0];
+      }
 
-  setError(message);
-  handleToast(message, "error");
-} finally {
-  setLoading(false);
-}
+      setError(message);
+      handleToast(message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -126,7 +127,7 @@ function Signup() {
               placeholder="Email"
               value={formData.email}
               onChange={handleChange}
-              className="rounded-md w-full p-3 pl-10 bg-orange-50 focus:outline-none focus:ring-2 focus:ring-orange-400 placeholder:text-black"
+              className="rounded-md w-full p-3 pl-10 placeholder:text-black bg-orange-50 focus:outline-none focus:ring-2 focus:ring-orange-400"
             />
           </div>
 
@@ -138,7 +139,7 @@ function Signup() {
               placeholder="Password"
               value={formData.password}
               onChange={handleChange}
-              className="rounded-xl p-3 w-full pl-10 bg-orange-50 focus:outline-none focus:ring-2 focus:ring-orange-400 placeholder:text-black"
+              className="rounded-xl p-3 w-full pl-10 bg-orange-50 placeholder:text-black focus:outline-none focus:ring-2 focus:ring-orange-400"
             />
           </div>
 
@@ -150,14 +151,14 @@ function Signup() {
               placeholder="Confirm Password"
               value={formData.confirmPassword}
               onChange={handleChange}
-              className="rounded-xl p-3 pl-10 w-full bg-orange-50 focus:outline-none focus:ring-2 focus:ring-orange-400 placeholder:text-black"
+              className="rounded-xl p-3 pl-10 w-full bg-orange-50 placeholder:text-black focus:outline-none focus:ring-2 focus:ring-orange-400"
             />
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-1/2 mx-auto block text-white p-3 rounded-xl bg-gradient-to-r from-[#FF7A2F] via-[#FFC7A6] to-[#F4E6DA] disabled:opacity-50"
+            className="w-full text-white p-3 rounded-xl bg-gradient-to-r from-[#FF7A2F] via-[#FFC7A6] to-[#F4E6DA] disabled:opacity-50"
           >
             {loading ? "Creating Account..." : "Sign Up"}
           </button>
@@ -168,10 +169,6 @@ function Signup() {
               Sign In
             </Link>
           </div>
-
-          <p className="text-center mt-2">Sign Up With others</p>
-
-          <OauthButtons />
         </form>
       </AuthFormWrapper>
     </AuthLayout>

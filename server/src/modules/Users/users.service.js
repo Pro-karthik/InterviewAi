@@ -9,13 +9,21 @@ import { ApiError } from "../../utils/ApiError.js";
   insertRefreshTokenQuery,
   findUserRefreshTokensQuery,
   revokeRefreshTokenQuery,
-  revokeAllUserTokensQuery
+  revokeAllUserTokensQuery,
+  getUserByEmailQuery,
+  updateOtpQuery,
+  updateOtpAttemptsQuery,
+  blockUserOtpQuery ,
+  clearOtpQuery,
+  updatePasswordQuery
 } from "./users.queries.js";
 import {
   generateToken,
   generateRefreshToken
 } from "../../utils/token.js";
 import { comparePassword } from "../../utils/hash.js";
+import { generateOTP,hashOTP } from "../../utils/Otpbased.js";
+import { sendOtpEmail } from "../../utils/sendEmail.js";
 
 export const registerUser = async (email, password) => {
   const { rows } = await pool.query(findUserByEmailQuery, [email]);
@@ -135,4 +143,76 @@ export const getUserById = async (id) => {
 
 export const logoutUser = async (userId) => {
   await pool.query(revokeAllUserTokensQuery, [userId]);
+};
+
+export const sendotpService = async (email) => {
+  const { rows } = await pool.query(getUserByEmailQuery, [email]);
+
+  if (rows.length === 0) throw new Error("User not found");
+
+  const user = rows[0];
+
+  // prevent resend within active expiry
+  if (user.otp_expires) {
+  const now = new Date();
+  const diff = (new Date(user.otp_expires) - now) / 1000;
+
+  if (diff > 240) { // block only if more than 4 mins left
+    throw new Error("Please wait before requesting new OTP.");
+  }
+}
+
+  const otp = generateOTP();
+  const hashotp = hashOTP(otp);
+  const expiresat = new Date(Date.now() + 5 * 60 * 1000);
+
+  await pool.query(updateOtpQuery, [hashotp, expiresat, email]);
+
+  await sendOtpEmail(email, otp);
+
+  return true;
+};
+
+export const verifyotpService = async (email, otp) => {
+  const { rows } = await pool.query(getUserByEmailQuery, [email]);
+
+  if (rows.length === 0) throw new ApiError("User not found", 404);
+
+  const user = rows[0];
+  const now = new Date();
+
+  // Block check
+  if (user.otp_block_until && now < user.otp_block_until) {
+    throw new Error("Account temporarily blocked. Try later.");
+  }
+
+  // Expiry check
+  if (!user.otp_expires || now > user.otp_expires) {
+    throw new Error("OTP expired. Request new one.");
+  }
+
+  const hashedOtp = hashOTP(otp);
+
+  if (!user.otp || hashedOtp !== user.otp) {
+    const attempts = user.otp_attempts + 1;
+
+    if (attempts >= 5) {
+      const blocktime = new Date(Date.now() + 5 * 60 * 1000);
+      await pool.query(blockUserOtpQuery, [attempts, blocktime, email]);
+      throw new Error("Too many attempts. Blocked for 5 minutes.");
+    }
+
+    await pool.query(updateOtpAttemptsQuery, [attempts, email]);
+    throw new Error("Invalid OTP");
+  }
+
+  // Success
+  await pool.query(clearOtpQuery, [email]);
+
+  return true;
+};
+export const resetPasswordService = async (email, password) => {
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  await pool.query(updatePasswordQuery, [hashedPassword, email]);
 };
