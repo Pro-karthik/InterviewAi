@@ -1,16 +1,15 @@
 import { useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import InstructionList from "./components/InstructionList";
 import DeclarationBox from "./components/DeclarationBox";
 
 const SetupPage = () => {
-  const { id } = useParams();
   const navigate = useNavigate();
   const [agreed, setAgreed] = useState(false);
 
   const handleContinue = () => {
     if (!agreed) return;
-    navigate(`/interview/device-check/${id}`);
+    navigate('/interview/device-check/');
   };
 
   return (

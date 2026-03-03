@@ -12,7 +12,7 @@ const steps = [
 
 const DeviceCheckPage = () => {
   const { stream, error } = useCameraStream();
-  const [step, setStep] = useState(2);
+  const [step, setStep] = useState(1);
 
   if (error) {
     return (
