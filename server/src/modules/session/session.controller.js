@@ -111,3 +111,25 @@ export const getSessionHistoryById = async (req, res, next) => {
     next(err);
   }
 }
+
+
+
+import { validateSkillsWithAI } from "../../ai/ai.service.js";
+
+export const validateInterviewController = async (req, res, next) => {
+  try {
+    const { skills, experience_level } = req.body;
+
+    // 🧠 AI validation layer
+    await validateSkillsWithAI(skills);
+
+    // If everything passes
+    res.status(200).json({
+      success: true,
+      message: "Skills validated successfully."
+    });
+
+  } catch (error) {
+    next(error);
+  }
+};

@@ -13,12 +13,12 @@ const app = express();
 
 
 app.use(morgan("dev"));
-app.use(cors({
+app.use(cors({        
   origin: "http://localhost:5173",
   credentials: true
 }));
 app.use(express.json());
-app.use(errorMiddleware);
+
 
 
 
@@ -36,6 +36,10 @@ app.use("/api/analytics", analyticsRoutes);
 app.get("/", (req, res) => {
   res.send("AI Mock Interviewer API is running");
 });
+
+
+app.use(errorMiddleware);
+
 
 
 /* ---------- Export App ---------- */
