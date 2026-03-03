@@ -8,6 +8,7 @@ import { AuthProvider } from "./context/AuthContext";
 import SessionDetail from "./Pages/Session/SessionDetails";
 import ToastProvider from "./components/ToastProvider";
 import HistoryPage from "./Pages/History/HistoryPage";
+import DeviceCheckPage from "./Pages/Interview/DeviceCheck/DeviceCheckPage";
 import NotFound from "./Pages/NotFound";
 import CreateInterview from "./Pages/Interview/Create/CreateInterview";
 import SetupPage from "./Pages/Interview/Setup/SetupPage";
@@ -39,6 +40,7 @@ function App() {
 
 
 
+          <Route path="/devicecheck" element={<DeviceCheckPage />} />
            <Route path="*" element={<NotFound />} />
       </Routes>
       </AuthProvider>
