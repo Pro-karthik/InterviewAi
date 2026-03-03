@@ -74,6 +74,7 @@ function SignIn() {
       setAccessToken(data.accessToken);
 
       handleToast("Login Successful", "success");
+      navigate("/dashboard",{replace:true});
 
       // navigation handled by useEffect
     } catch (err) {
