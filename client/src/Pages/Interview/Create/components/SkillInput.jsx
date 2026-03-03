@@ -8,6 +8,7 @@ import {
 import { SiMongodb, SiDocker } from "react-icons/si";
 import { MdDesignServices } from "react-icons/md";
 import { FiPlus, FiX } from "react-icons/fi";
+import {toast} from "react-toastify";
 
 const SKILLS = [
   { name: "React", icon: <FaReact className="text-blue-500" /> },
@@ -54,19 +55,39 @@ const SkillInput = ({ value = [], onChange }) => {
   const [showCustom, setShowCustom] = useState(false);
   const [error, setError] = useState("");
 
+   function handleToast(status, message){
+      if (status === "error") {
+        toast.error(message, {
+          className: "rounded-lg shadow-lg",
+          progressClassName: "bg-white",
+        });
+      }
+      else {
+        toast.success(message, {
+          className: "rounded-lg shadow-lg",
+          progressClassName: "bg-white",
+        });
+      }
+    };
+
   const toggleSkill = (skill) => {
     if (value.includes(skill)) {
       onChange(value.filter((s) => s !== skill));
       setError("");
       return;
     }
+   
 
     if (value.length >= MAX_SKILLS) {
       setError("You can select maximum 5 skills.");
+      handleToast("error", "You can select maximum 5 skills.");
       return;
     }
 
+
+
     onChange([...value, skill]);
+    handleToast("success", `Skill "${skill}" added.`);
     setError("");
   };
 
@@ -74,7 +95,8 @@ const SkillInput = ({ value = [], onChange }) => {
     const sanitized = sanitizeSkill(customSkill);
 
     if (!isValidSkillFormat(sanitized)) {
-      setError("Skill must be 2-30 valid characters.");
+      // setError("Skill must be 2-30 valid characters.");
+      handleToast("error", "Skill must be 2-30 valid characters.");
       return;
     }
 
@@ -84,12 +106,13 @@ const SkillInput = ({ value = [], onChange }) => {
       sanitized.charAt(0).toUpperCase() + sanitized.slice(1);
 
     if (value.includes(normalized)) {
-      setError("Skill already selected.");
+      // setError("Skill already selected.");
+      handleToast("error", "Skill already selected.");
       return;
     }
 
     if (value.length >= MAX_SKILLS) {
-      setError("You can select maximum 5 skills.");
+      handleToast("error", "You can select maximum 5 skills.");
       return;
     }
 
@@ -119,11 +142,10 @@ const SkillInput = ({ value = [], onChange }) => {
               key={skill.name}
               type="button"
               onClick={() => toggleSkill(skill.name)}
-              className={`flex items-center gap-3 p-6 rounded-xl border shadow-md transition-all duration-200 ${
-                active
-                  ? "bg-[#553a63] text-white border-[#4D2C5E] shadow-lg"
-                  : "bg-white border-gray-200 hover:shadow-md hover:border-[#4D2C5E]/40"
-              }`}
+              className={`flex items-center gap-3 p-6 rounded-xl border shadow-md transition-all duration-200 ${active
+                ? "bg-[#553a63] text-white border-[#4D2C5E] shadow-lg"
+                : "bg-white border-gray-200 hover:shadow-md hover:border-[#4D2C5E]/40"
+                }`}
             >
               <span className="text-lg">{skill.icon}</span>
               <span className="text-md font-medium">
@@ -178,9 +200,9 @@ const SkillInput = ({ value = [], onChange }) => {
         </div>
       )}
 
-      {error && (
+      {/* {error && (
         <p className="text-sm text-red-500 mt-3">{error}</p>
-      )}
+      )} */}
     </div>
   );
 };

@@ -11,6 +11,8 @@ import HistoryPage from "./Pages/History/HistoryPage";
 import NotFound from "./Pages/NotFound";
 import CreateInterview from "./Pages/Interview/Create/CreateInterview";
 import SetupPage from "./Pages/Interview/Setup/SetupPage";
+import TerminatedPage from "./Pages/Interview/Terminated/TerminatedPage";
+import EvaluatingPage from "./Pages/Interview/Evaluating/EvaluatingPage";
 
 function App() {
   return (
@@ -26,7 +28,14 @@ function App() {
           <Route path="/session/:id" element={<SessionDetail />} />
 
           <Route path="/interview/start" element={<CreateInterview />} />
-          <Route path="/interview/setup/:id" element={<SetupPage />} />
+          <Route path="/interview/setup/instructions" element={<SetupPage />} />  
+
+          <Route path="/interview/setup/instructions" element={<SetupPage />} />
+
+          <Route path="/interview/evaluating" element={<EvaluatingPage />} />  
+          <Route path="/interview/terminated" element={<TerminatedPage />} />
+
+
 
 
 

@@ -1,6 +1,7 @@
   import { useState } from "react";
   import SkillInput from "./SkillInput";
   import ExperienceSelector from "./ExperienceSelector";
+  import {toast} from "react-toastify";
 
   const CreateForm = ({ onSubmit, loading }) => {
     const [skills, setSkills] = useState([]);
@@ -8,12 +9,18 @@
 
     const handleSubmit = () => {
       if (!skills.length) {
-        alert("Please select at least one skill.");
+        toast.error("Please enter at least one skill.",{
+           className: "rounded-lg shadow-lg",
+          progressClassName: "bg-white",
+        });
         return;
       }
 
       if (!experience) {
-        alert("Please select your experience level.");
+        toast.error("Please select your experience level.",{
+           className: "rounded-lg shadow-lg",
+          progressClassName: "bg-white",
+        });
         return;
       }
 
