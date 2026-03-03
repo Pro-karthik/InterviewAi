@@ -9,6 +9,8 @@ import SessionDetail from "./Pages/Session/SessionDetails";
 import ToastProvider from "./components/ToastProvider";
 import HistoryPage from "./Pages/History/HistoryPage";
 import NotFound from "./Pages/NotFound";
+import CreateInterview from "./Pages/Interview/Create/CreateInterview";
+import SetupPage from "./Pages/Interview/Setup/SetupPage";
 
 function App() {
   return (
@@ -22,6 +24,12 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/history" element={<HistoryPage />} />
           <Route path="/session/:id" element={<SessionDetail />} />
+
+          <Route path="/interview/start" element={<CreateInterview />} />
+          <Route path="/interview/setup/:id" element={<SetupPage />} />
+
+
+
            <Route path="*" element={<NotFound />} />
       </Routes>
       </AuthProvider>
