@@ -41,7 +41,7 @@ const useCameraPositionCheck = (videoRef) => {
         await tf.ready();
 
         const model = faceDetection.SupportedModels.MediaPipeFaceDetector;
-const detectorConfig = { runtime: "tfjs", maxFaces: 1 };
+const detectorConfig = { runtime: "tfjs", maxFaces: 1, modelType: "short" };
 detectorRef.current = await faceDetection.createDetector(model, detectorConfig);
 
         await waitForVideoReady();
