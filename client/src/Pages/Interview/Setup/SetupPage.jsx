@@ -1,8 +1,8 @@
-const SetipPage = () => {
+const SetupPage = () => {
   return (
     <div>
         <h1>Setup Page</h1>
     </div>  
     )
 }
-export default SetipPage;   
+export default SetupPage;   
