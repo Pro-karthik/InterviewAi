@@ -17,61 +17,125 @@ const CameraCheck = ({ stream, onNext }) => {
     }
   }, [stream]);
 
-  const isReady = isFaceDetected && isCentered && faceDirection === "straight";
+  const isReady =
+    isFaceDetected &&
+    isCentered &&
+    faceDirection === "straight";
 
   return (
-    <div className="flex flex-col items-center gap-6 w-full max-w-2xl mx-auto">
+    <div className="w-full h-[520px] flex gap-10">
 
-      {/* Video Section */}
-      <div className="relative w-full aspect-video rounded-2xl overflow-hidden shadow-xl bg-black">
+      {/* LEFT — Camera Section */}
+      <div className="flex-1 flex flex-col justify-between">
 
-        <video
-          ref={videoRef}
-          autoPlay
-          playsInline
-          muted
-          className="w-full h-full object-cover scale-x-[-1]"
-        />
+        {/* Header */}
+        <div>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">
+            Camera Setup
+          </h2>
+          <p className="text-sm text-gray-500 max-w-md">
+            Ensure your face is clearly visible and positioned correctly.
+            Proper alignment helps verify your identity securely.
+          </p>
+        </div>
 
-        {/* Center Guide Box */}
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <div
-            className={`w-[60%] h-[70%] rounded-xl border-2 border-dashed transition-all duration-300
-              ${
-                isCentered
-                  ? "border-green-500"
-                  : "border-white/60"
-              }`}
+        {/* Video */}
+       <div
+  className={`relative w-full aspect-[4/3] rounded-2xl overflow-hidden bg-gray-100 transition-all duration-300
+  ${
+    isReady
+      ? "border-2 border-green-500 shadow-[0_0_25px_rgba(34,197,94,0.35)]"
+      : isFaceDetected
+      ? "border-2 border-red-500 shadow-[0_0_25px_rgba(239,68,68,0.35)]"
+      : "border border-gray-200"
+  }`}
+>
+          <video
+            ref={videoRef}
+            autoPlay
+            playsInline
+            muted
+            className="w-full h-full object-cover scale-x-[-1]"
           />
+
+          {/* Guide Frame */}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+           <div
+  className={`w-[65%] h-[75%] rounded-xl border-2 transition-all duration-300
+  ${
+    isReady
+      ? "border-green-500 shadow-[0_0_20px_rgba(34,197,94,0.35)]"
+      : isFaceDetected
+      ? "border-red-500 shadow-[0_0_20px_rgba(239,68,68,0.35)]"
+      : "border-gray-300"
+  }`}
+/>
+          </div>
+
+          {/* Status Pill */}
+          <div className="absolute top-4 left-4">
+            <div
+              className={`px-3 py-1 text-xs rounded-full font-medium transition-all
+              ${
+                isReady
+                  ? "bg-[#F4ECF7] text-[#5B2C6F]"
+                  : "bg-gray-200 text-gray-600"
+              }`}
+            >
+              {isReady ? "Ready" : "Adjust Position"}
+            </div>
+          </div>
+        </div>
+
+        {/* Live Instruction */}
+        <div className="text-sm text-gray-500 min-h-[24px]">
+          {alignmentMessage ||
+            "Position your face inside the frame and look directly at the camera."}
         </div>
       </div>
 
-      {/* Status Panel */}
-      <div className="w-full bg-neutral-900 text-white rounded-xl p-5 space-y-3 shadow-lg">
+      {/* RIGHT — Checklist & Actions */}
+      <div className="w-[380px] flex flex-col justify-between">
 
-        <StatusItem label="Face Detected" value={isFaceDetected} />
-        <StatusItem label="Centered" value={isCentered} />
-        <StatusItem
-          label="Looking Straight"
-          value={faceDirection === "straight"}
-        />
+        {/* Status Card */}
+        <div className="bg-[#F8F9FA] border border-gray-200 rounded-2xl p-6 space-y-4">
+          <h3 className="text-sm font-semibold text-gray-900 mb-2">
+            Verification Status
+          </h3>
 
-        <div className="text-center text-sm mt-2 font-medium text-gray-300">
-          {alignmentMessage}
+          <StatusItem label="Face detected" value={isFaceDetected} />
+          <StatusItem label="Centered in frame" value={isCentered} />
+          <StatusItem
+            label="Looking straight"
+            value={faceDirection === "straight"}
+          />
         </div>
 
-        {/* Next Step Button */}
+        {/* Guidelines */}
+        <div className="bg-white border border-gray-200 rounded-2xl p-6 space-y-3">
+          <h3 className="text-sm font-semibold text-gray-900">
+            Guidelines
+          </h3>
+          <ul className="space-y-2 text-sm text-gray-500">
+            <li>• Ensure proper lighting on your face</li>
+            <li>• Remove hats or face coverings</li>
+            <li>• Avoid multiple people in frame</li>
+            <li>• Keep camera at eye level</li>
+          </ul>
+        </div>
+
+        {/* CTA */}
         <button
           disabled={!isReady}
           onClick={onNext}
-          className={`w-full mt-4 py-3 rounded-xl font-semibold transition-all duration-300
-            ${
-              isReady
-                ? "bg-green-600 hover:bg-green-700 text-white"
-                : "bg-gray-700 text-gray-400 cursor-not-allowed"
-            }`}
+          className={`w-full py-3 rounded-xl font-semibold transition-all duration-200
+          ${
+            isReady
+              ? "bg-[#5B2C6F] hover:bg-[#4A235A] text-white shadow-sm"
+              : "bg-gray-200 text-gray-400 cursor-not-allowed"
+          }`}
         >
-          Next Step
+          Continue to Audio Check
         </button>
       </div>
     </div>
@@ -80,13 +144,16 @@ const CameraCheck = ({ stream, onNext }) => {
 
 const StatusItem = ({ label, value }) => (
   <div className="flex justify-between items-center text-sm">
-    <span className="text-gray-300">{label}</span>
+    <span className="text-gray-600">{label}</span>
     <span
-      className={`font-semibold ${
-        value ? "text-green-500" : "text-red-500"
+      className={`font-medium transition-colors
+      ${
+        value
+          ? "text-[#5B2C6F]"
+          : "text-gray-400"
       }`}
     >
-      {value ? "✓" : "✗"}
+      {value ? "Verified" : "Pending"}
     </span>
   </div>
 );
