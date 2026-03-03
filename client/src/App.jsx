@@ -13,7 +13,6 @@ import VerifyOtp from "./Pages/Auth/VerifyOtp";
 import NotFound from "./Pages/NotFound";
 import ResetPassword from "./Pages/Auth/ResetPassword";
 import DeviceCheckPage from "./Pages/Interview/DeviceCheck/DeviceCheckPage";
-import NotFound from "./Pages/NotFound";
 import CreateInterview from "./Pages/Interview/Create/CreateInterview";
 import SetupPage from "./Pages/Interview/Setup/SetupPage";
 import TerminatedPage from "./Pages/Interview/Terminated/TerminatedPage";
