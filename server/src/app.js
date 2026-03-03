@@ -18,7 +18,7 @@ app.use(cors({
   credentials: true
 }));
 app.use(express.json());
-app.use(errorMiddleware);
+
 
 
 
@@ -36,6 +36,10 @@ app.use("/api/analytics", analyticsRoutes);
 app.get("/", (req, res) => {
   res.send("AI Mock Interviewer API is running");
 });
+
+
+app.use(errorMiddleware);
+
 
 
 /* ---------- Export App ---------- */

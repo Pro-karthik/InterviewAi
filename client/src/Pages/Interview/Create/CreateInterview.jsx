@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import CreateForm from "./components/CreateForm";
-// import { createDraftInterview } from "../../../api/interview.api";
+import axios from "axios";
 
 const CreateInterview = () => {
   const navigate = useNavigate();
@@ -11,25 +11,35 @@ const CreateInterview = () => {
     try {
       setLoading(true);
 
-      // Example payload structure
       const payload = {
         skills,
         experience_level: experience,
       };
 
-      console.log("Creating Interview:", payload);
+      
+      await axios.post(
+        "http://localhost:5000/api/session/create",
+        payload,
+        {
+          withCredentials: true
+        }
+      );
 
-      // Uncomment when API ready
-      /*
-      const res = await createDraftInterview(payload);
-      navigate(`/interview/setup/${res.session.id}`);
-      */
-
-      // Temporary navigation simulation
-      navigate(`/interview/setup/demo-session-id`);
+      
+      navigate("/interview/instructions", {
+        state: payload
+      });
 
     } catch (error) {
       console.error(error);
+      console.log(error?.response); 
+
+      const message =
+        error?.response?.data?.message ||
+        "Skill validation failed.";
+
+      alert(message);
+
     } finally {
       setLoading(false);
     }

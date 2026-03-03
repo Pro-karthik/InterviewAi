@@ -19,7 +19,35 @@ const SKILLS = [
   { name: "MongoDB", icon: <SiMongodb className="text-green-500" /> },
 ];
 
+const SKILL_DICTIONARY = {
+  react: "React",
+  reactjs: "React",
+  node: "Node.js",
+  nodejs: "Node.js",
+  mongodb: "MongoDB",
+  mongo: "MongoDB",
+  python: "Python",
+  java: "Java",
+  docker: "DevOps",
+  devops: "DevOps",
+  systemdesign: "System Design",
+};
+
 const MAX_SKILLS = 5;
+
+const sanitizeSkill = (input) => {
+  return input
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9\s.+#]/gi, "")
+    .replace(/\s+/g, " ");
+};
+
+const isValidSkillFormat = (skill) => {
+  if (!skill) return false;
+  if (skill.length < 2 || skill.length > 30) return false;
+  return true;
+};
 
 const SkillInput = ({ value = [], onChange }) => {
   const [customSkill, setCustomSkill] = useState("");
@@ -43,17 +71,29 @@ const SkillInput = ({ value = [], onChange }) => {
   };
 
   const addCustomSkill = () => {
-    const trimmed = customSkill.trim();
-    if (!trimmed) return;
+    const sanitized = sanitizeSkill(customSkill);
 
-    if (value.includes(trimmed)) return;
+    if (!isValidSkillFormat(sanitized)) {
+      setError("Skill must be 2-30 valid characters.");
+      return;
+    }
+
+    const key = sanitized.replace(/\s/g, "");
+    const normalized =
+      SKILL_DICTIONARY[key] ||
+      sanitized.charAt(0).toUpperCase() + sanitized.slice(1);
+
+    if (value.includes(normalized)) {
+      setError("Skill already selected.");
+      return;
+    }
 
     if (value.length >= MAX_SKILLS) {
       setError("You can select maximum 5 skills.");
       return;
     }
 
-    onChange([...value, trimmed]);
+    onChange([...value, normalized]);
     setCustomSkill("");
     setShowCustom(false);
     setError("");
@@ -61,7 +101,6 @@ const SkillInput = ({ value = [], onChange }) => {
 
   return (
     <div className="h-full flex flex-col">
-
       <div className="mb-4">
         <h2 className="text-lg font-semibold text-gray-800">
           Select Skills
@@ -71,9 +110,7 @@ const SkillInput = ({ value = [], onChange }) => {
         </p>
       </div>
 
-      {/* Skills Grid */}
       <div className="grid grid-cols-3 gap-4">
-
         {SKILLS.map((skill) => {
           const active = value.includes(skill.name);
 
@@ -82,15 +119,11 @@ const SkillInput = ({ value = [], onChange }) => {
               key={skill.name}
               type="button"
               onClick={() => toggleSkill(skill.name)}
-              className={`
-                flex items-center gap-3 p-6 rounded-xl border shadow-md
-                transition-all duration-200
-                ${
-                  active
-                    ? "bg-[#553a63] text-white border-[#4D2C5E] shadow-lg"
-                    : "bg-white border-gray-200 hover:shadow-md hover:border-[#4D2C5E]/40"
-                }
-              `}
+              className={`flex items-center gap-3 p-6 rounded-xl border shadow-md transition-all duration-200 ${
+                active
+                  ? "bg-[#553a63] text-white border-[#4D2C5E] shadow-lg"
+                  : "bg-white border-gray-200 hover:shadow-md hover:border-[#4D2C5E]/40"
+              }`}
             >
               <span className="text-lg">{skill.icon}</span>
               <span className="text-md font-medium">
@@ -100,7 +133,6 @@ const SkillInput = ({ value = [], onChange }) => {
           );
         })}
 
-        {/* Custom Skill Card */}
         <button
           type="button"
           onClick={() => setShowCustom(true)}
@@ -111,7 +143,6 @@ const SkillInput = ({ value = [], onChange }) => {
         </button>
       </div>
 
-      {/* Custom Input */}
       {showCustom && (
         <div className="mt-4 flex gap-3">
           <input
@@ -131,7 +162,6 @@ const SkillInput = ({ value = [], onChange }) => {
         </div>
       )}
 
-      {/* Selected Skills Tags */}
       {value.length > 0 && (
         <div className="flex flex-wrap gap-2 mt-4">
           {value.map((skill) => (
@@ -148,11 +178,9 @@ const SkillInput = ({ value = [], onChange }) => {
         </div>
       )}
 
-      {/* Error Message */}
       {error && (
         <p className="text-sm text-red-500 mt-3">{error}</p>
       )}
-
     </div>
   );
 };
