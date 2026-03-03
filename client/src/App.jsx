@@ -12,6 +12,12 @@ import Forgot from "./Pages/Auth/Forgot"
 import VerifyOtp from "./Pages/Auth/VerifyOtp";
 import NotFound from "./Pages/NotFound";
 import ResetPassword from "./Pages/Auth/ResetPassword";
+import DeviceCheckPage from "./Pages/Interview/DeviceCheck/DeviceCheckPage";
+import NotFound from "./Pages/NotFound";
+import CreateInterview from "./Pages/Interview/Create/CreateInterview";
+import SetupPage from "./Pages/Interview/Setup/SetupPage";
+import TerminatedPage from "./Pages/Interview/Terminated/TerminatedPage";
+import EvaluatingPage from "./Pages/Interview/Evaluating/EvaluatingPage";
 function App() {
   return (
     <BrowserRouter>
@@ -27,6 +33,20 @@ function App() {
           <Route path="/forgot" element={<Forgot/>}/>
           <Route path="/verifyotp" element={<VerifyOtp />} />
           <Route path="/resetpassword" element={<ResetPassword />}/>
+
+          <Route path="/interview/start" element={<CreateInterview />} />
+          <Route path="/interview/setup/instructions" element={<SetupPage />} />  
+
+          <Route path="/interview/device-check" element={<DeviceCheckPage />} />
+
+          <Route path="/interview/evaluating" element={<EvaluatingPage />} />  
+          <Route path="/interview/terminated" element={<TerminatedPage />} />
+
+
+
+
+
+          <Route path="/interview/devicecheck" element={<DeviceCheckPage />} />
            <Route path="*" element={<NotFound />} />
       </Routes>
       </AuthProvider>

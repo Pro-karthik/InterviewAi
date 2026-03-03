@@ -1,8 +1,17 @@
 import express from "express";
 import * as sessionController from "./session.controller.js";
 import { authenticate } from "../../middlewares/auth.middleware.js";
+import { validateCreateInterview } from "../../middlewares/validation.middleware.js";
 
 const router = express.Router();
+
+//validation for create interview
+router.post(
+  "/create",
+ 
+  validateCreateInterview,
+  sessionController.validateInterviewController
+); 
 
 // Start Interview
 router.post("/interview/start", authenticate, sessionController.startInterview);
