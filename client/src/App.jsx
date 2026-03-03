@@ -30,7 +30,7 @@ function App() {
           <Route path="/interview/start" element={<CreateInterview />} />
           <Route path="/interview/setup/instructions" element={<SetupPage />} />  
 
-          <Route path="/interview/devicecheck" element={<DeviceCheckPage />} />
+          <Route path="/interview/device-check" element={<DeviceCheckPage />} />
 
           <Route path="/interview/evaluating" element={<EvaluatingPage />} />  
           <Route path="/interview/terminated" element={<TerminatedPage />} />
