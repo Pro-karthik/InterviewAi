@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import useSpeechVerification from "../../../../hooks/useSpeechVerification";
 
 const sentence =
-  "I am ready to begin my AI interview session with confidence.";
+  "I am ready to begin my AI interview session with confidence";
 
 const AudioCheck = ({ onNext }) => {
   const {

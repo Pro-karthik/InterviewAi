@@ -49,13 +49,23 @@ const useCameraPositionCheck = (videoRef) => {
 
         if (!isMounted) return;
 
-        if (!predictions || predictions.length === 0) {
-          setStatus({
-            isFaceDetected: false,
-            isCentered: false,
-            alignmentMessage: "No face detected",
-          });
-        } else {
+       if (!predictions || predictions.length === 0) {
+  setStatus({
+    isFaceDetected: false,
+    isCentered: false,
+    faceDirection: null,
+    alignmentMessage: "No face detected",
+  });
+
+} else if (predictions.length > 1) {
+  setStatus({
+    isFaceDetected: true,
+    isCentered: false,
+    faceDirection: null,
+    alignmentMessage: "Multiple faces detected. Only one person allowed.",
+  });
+
+} else {
          const face = predictions[0];
 
 const [x1, y1] = face.topLeft;
