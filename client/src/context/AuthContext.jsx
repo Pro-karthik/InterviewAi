@@ -9,7 +9,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // 🔐 Safe token setter (clears header properly)
+  // 🔐 Safe token setter
   const setAccessToken = (token) => {
     if (token) {
       axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
@@ -19,12 +19,13 @@ export const AuthProvider = ({ children }) => {
     setAccessTokenState(token);
   };
 
-  // 🚀 Initialize auth once
+  // 🚀 Initialize authentication
   useEffect(() => {
     let isMounted = true;
 
     const initializeAuth = async () => {
       try {
+
         const refreshRes = await refreshAccessToken();
         const newAccessToken = refreshRes?.data?.accessToken;
 
@@ -35,14 +36,18 @@ export const AuthProvider = ({ children }) => {
         setAccessToken(newAccessToken);
 
         const profileRes = await getProfile();
+
         if (!isMounted) return;
 
         setUser(profileRes.data);
+
       } catch (err) {
-        if (isMounted) {
+
+        if (err.response?.status === 401 && isMounted) {
           setAccessToken(null);
           setUser(null);
         }
+
       } finally {
         if (isMounted) setLoading(false);
       }
@@ -53,16 +58,17 @@ export const AuthProvider = ({ children }) => {
     return () => {
       isMounted = false;
     };
+
   }, []);
 
-  // 🔴 Proper logout
+  // 🔴 Logout
   const logout = async () => {
     try {
-      await logoutApi(); // clears refresh cookie in backend
+      await logoutApi();
     } catch (err) {}
 
-    setAccessToken(null);   // clears axios header
-    setUser(null);          // clears user
+    setAccessToken(null);
+    setUser(null);
   };
 
   return (

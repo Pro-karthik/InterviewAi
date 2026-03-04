@@ -20,42 +20,49 @@ function Forgot() {
       progressClassName: "bg-white",
     };
 
-    if (type === "success") {
-      toast.success(message, options);
-    } else {
-      toast.error(message, options);
-    }
+    type === "success"
+      ? toast.success(message, options)
+      : toast.error(message, options);
   }, []);
 
-  const extractHtmlError = (htmlString) => {
-    if (!htmlString) return "Something went wrong";
-
-    const match = htmlString.match(/Error:\s*(.*?)<br>/);
-    return match ? match[1] : "Something went wrong";
+  const extractHtmlError = (html) => {
+    try {
+      const match = html.match(/Error:\s*(.*?)<br>/i);
+      return match?.[1] || "Something went wrong";
+    } catch {
+      return "Something went wrong";
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!email.trim()) {
+    const trimmedEmail = email.trim();
+
+    if (!trimmedEmail) {
       return handleToast("Email is required");
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(trimmedEmail)) {
+      return handleToast("Enter a valid email");
     }
 
     try {
       setLoading(true);
 
-      await forgotPassword({ email });
+      await forgotPassword({ email: trimmedEmail });
 
       handleToast("OTP sent to your email", "success");
 
-      navigate("/verifyotp", { state: { email } });
+      navigate("/verifyotp", { state: { email: trimmedEmail } });
 
     } catch (err) {
       let message = "Failed to send OTP";
 
       if (err?.response?.data) {
         if (typeof err.response.data === "string") {
-          // Backend returning HTML error
           message = extractHtmlError(err.response.data);
         } else if (err.response.data.message) {
           message = err.response.data.message;
@@ -75,16 +82,28 @@ function Forgot() {
         subtitle="Enter your registered email to receive OTP"
       >
         <form onSubmit={handleSubmit} className="space-y-5">
-          <div className="relative">
-            <AiOutlineMail className="absolute left-3 top-3.5 text-black text-lg" />
-            <input
-              type="email"
-              placeholder="Enter your email"
-              className="rounded-md w-full p-3 pl-10 bg-orange-50 focus:outline-none focus:ring-2 focus:ring-orange-400"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
+          <div className="space-y-2">
+  <label
+    htmlFor="email"
+    className="block text-sm font-poppins text-gray-700"
+  >
+    Please enter registered email to send OTP
+  </label>
+
+  <div className="relative">
+    <AiOutlineMail className="absolute left-3 top-3.5 text-black text-lg" />
+
+    <input
+      id="email"
+      type="email"
+      placeholder="Registered Email ID"
+      className="w-full rounded-md p-3 pl-10 bg-orange-50 focus:outline-none focus:ring-2 focus:ring-orange-400"
+      value={email}
+      onChange={(e) => setEmail(e.target.value)}
+      required
+    />
+  </div>
+</div>
 
           <button
             type="submit"

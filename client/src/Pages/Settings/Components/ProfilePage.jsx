@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import Sidebar from "../../../components/Sidebar";
+import MainLayout from "../../../layouts/MainLayout";
 import { updateProfile } from "../../../api/auth.api";
 import { useAuth } from "../../../context/AuthContext";
 
@@ -39,27 +39,26 @@ function ProfilePage() {
       [name]: value,
     }));
   };
+const handleSave = async () => {
+  try {
+    const res = await updateProfile(formData);
 
-  const handleSave = async () => {
-    try {
-      const res = await updateProfile(formData);
+    setUser(res.data.user);   // important fix
+    setEditMode(false);
 
-      setUser(res.data); // update context user
-      setEditMode(false);
-
-    } catch (error) {
-      console.error("Update failed", error);
-    }
-  };
+  } catch (error) {
+    console.error("Update failed", error);
+  }
+};
 
   if (!user) return <p className="p-10">Loading profile...</p>;
 
   const initial = user.name?.charAt(0).toUpperCase();
 
   return (
+    <MainLayout>
     <div className="flex min-h-screen bg-gray-100">
 
-      <Sidebar />
 
       <div className="flex-1 p-6">
         <div className="max-w-4xl mx-auto bg-white shadow rounded-xl">
@@ -175,6 +174,7 @@ function ProfilePage() {
         </div>
       </div>
     </div>
+    </MainLayout>
   );
 }
 

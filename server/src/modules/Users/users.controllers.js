@@ -82,8 +82,11 @@ export const refreshController = async (req, res, next) => {
 };
 
 export const updateProfile = async (req, res) => {
-
   try {
+
+    if (!req.user) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
 
     const userId = req.user.id;
 

@@ -3,7 +3,10 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import AuthLayout from "./Components/AuthLayout";
 import AuthFormWrapper from "./Components/AuthFormWrapper";
-import { verifyOtp as verifyOtpApi, resendOtp as resendOtpApi } from "../../api/auth.api";
+import {
+  verifyOtp as verifyOtpApi,
+  resendOtp as resendOtpApi,
+} from "../../api/auth.api";
 
 function VerifyOtp() {
   const navigate = useNavigate();
@@ -79,43 +82,42 @@ function VerifyOtp() {
     inputsRef.current[5]?.focus();
   };
 
- const handleSubmit = async (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  if (verified || loading) return;
+    if (verified || loading) return;
 
-  const finalOtp = otp.join("");
+    const finalOtp = otp.join("");
 
-  if (finalOtp.length !== 6) {
-    return handleToast("Enter complete OTP");
-  }
-
-  try {
-    setLoading(true);
-
-    const res = await verifyOtpApi({ email, otp: finalOtp });
-
-    console.log("verify response:", res);
-
-    if (res.success) {
-      setVerified(true);
-
-      handleToast(res.message, "success");
-
-      navigate("/resetpassword", { state: { email } });
+    if (finalOtp.length !== 6) {
+      return handleToast("Enter complete OTP");
     }
 
-  } catch (err) {
-    console.log("verify error:", err);
+    try {
+      setLoading(true);
 
-    setOtp(["", "", "", "", "", ""]);
-    inputsRef.current[0]?.focus();
+      const res = await verifyOtpApi({ email, otp: finalOtp });
 
-    handleToast(err?.response?.data?.message || "Invalid OTP");
-  } finally {
-    setLoading(false);
-  }
-};
+      console.log("verify response:", res);
+
+      if (res.success) {
+        setVerified(true);
+
+        handleToast(res.message, "success");
+
+        navigate("/resetpassword", { state: { email } });
+      }
+    } catch (err) {
+      console.log("verify error:", err);
+
+      setOtp(["", "", "", "", "", ""]);
+      inputsRef.current[0]?.focus();
+
+      handleToast(err?.response?.data?.message || "Invalid OTP");
+    } finally {
+      setLoading(false);
+    }
+  };
   const handleResendOtp = async () => {
     try {
       await resendOtpApi({ email });
@@ -125,7 +127,6 @@ function VerifyOtp() {
       setOtp(["", "", "", "", "", ""]);
       setTimer(60);
       inputsRef.current[0]?.focus();
-
     } catch (err) {
       handleToast(err?.response?.data?.message || "Failed to resend OTP");
     }
@@ -138,21 +139,37 @@ function VerifyOtp() {
         subtitle={`Enter the 6-digit OTP sent to ${email}`}
       >
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="flex justify-between gap-3" onPaste={handlePaste}>
-            {otp.map((digit, index) => (
-              <input
-                key={index}
-                type="text"
-                maxLength="1"
-                value={digit}
-                ref={(el) => (inputsRef.current[index] = el)}
-                onChange={(e) => handleChange(e.target.value, index)}
-                onKeyDown={(e) => handleKeyDown(e, index)}
-                className="w-12 h-12 text-center text-xl font-semibold rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400"
-              />
-            ))}
-          </div>
+          <div className="space-y-3">
+            <label
+              htmlFor="otp-0"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Enter the 6-digit OTP sent to your email
+            </label>
 
+            <p className="text-xs text-gray-500">
+              Please check your registered email. Enter the verification code to
+              continue.
+            </p>
+
+            <div className="flex justify-between gap-3" onPaste={handlePaste}>
+              {otp.map((digit, index) => (
+                <input
+                  key={index}
+                  id={`otp-${index}`}
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  maxLength="1"
+                  value={digit}
+                  ref={(el) => (inputsRef.current[index] = el)}
+                  onChange={(e) => handleChange(e.target.value, index)}
+                  onKeyDown={(e) => handleKeyDown(e, index)}
+                  className="w-12 h-12 text-center text-xl font-semibold rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400"
+                />
+              ))}
+            </div>
+          </div>
           <button
             type="submit"
             disabled={loading || verified}
@@ -161,14 +178,16 @@ function VerifyOtp() {
             {loading ? "Verifying..." : "Verify OTP"}
           </button>
 
-          <button
-            type="button"
-            onClick={handleResendOtp}
-            disabled={timer > 0}
-            className="text-orange-500 text-sm"
-          >
-            {timer > 0 ? `Resend in ${timer}s` : "Resend OTP"}
-          </button>
+          <p className="text-sm text-gray-500 mt-3">
+            Didn't receive the code?
+            <button
+              type="button"
+              className="text-orange-500 font-medium ml-1 hover:underline"
+              onClick={handleResendOtp}
+            >
+              Resend OTP
+            </button>
+          </p>
         </form>
       </AuthFormWrapper>
     </AuthLayout>
