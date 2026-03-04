@@ -41,18 +41,66 @@ export async function startInterviewService(userId, skill, experience) {
       );
     }
 
-    // Update status → IN_PROGRESS
+    // Interview prepared but not started
     await queries.updateSessionStatus(
       client,
       session.id,
-      "IN_PROGRESS"
+      "READY"
     );
 
     await client.query("COMMIT");
 
     return {
       session_id: session.id,
-      aiResponse,
+      message: "Interview prepared successfully"
+    };
+
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+
+export async function beginInterviewService(sessionId, userId) {
+  const client = await pool.connect();
+
+  try {
+    await client.query("BEGIN");
+
+    const session = await queries.getSessionById(client, sessionId);
+
+    if (!session) {
+      throw new Error("Session not found");
+    }
+
+    if (session.user_id !== userId) {
+      throw new Error("Unauthorized");
+    }
+
+    if (session.status !== "READY") {
+      throw new Error("Interview already started or invalid state");
+    }
+
+    // Interview duration (15 minutes)
+    const durationSeconds = 900;
+
+    await queries.startInterviewTimer(
+      client,
+      sessionId,
+      durationSeconds
+    );
+
+    await queries.updateSessionStatus(
+      client,
+      sessionId,
+      "IN_PROGRESS"
+    );
+
+    await client.query("COMMIT");
+
+    return {
       message: "Interview started successfully"
     };
 
@@ -164,23 +212,23 @@ export async function evaluateSessionService(sessionId, userId) {
       terminatedBySystem: security.terminated
     };
     // Calculate risk score
-let riskScore =
-  (security.total_score / MAX_TOTAL_SCORE) * 70 +
-  (security.tab_visibility_count * 2) +
-  (security.window_blur_count * 3);
+    let riskScore =
+      (security.total_score / MAX_TOTAL_SCORE) * 70 +
+      (security.tab_visibility_count * 2) +
+      (security.window_blur_count * 3);
 
-riskScore = Math.min(100, Math.round(riskScore));
+    riskScore = Math.min(100, Math.round(riskScore));
 
-let riskLevel;
-if (riskScore < 30) {
-  riskLevel = "LOW";
-} else if (riskScore < 70) {
-  riskLevel = "MEDIUM";
-} else {
-  riskLevel = "HIGH";
-}
+    let riskLevel;
+    if (riskScore < 30) {
+      riskLevel = "LOW";
+    } else if (riskScore < 70) {
+      riskLevel = "MEDIUM";
+    } else {
+      riskLevel = "HIGH";
+    }
 
-await queries.updateSessionRisk(client, sessionId, riskScore, riskLevel);
+    await queries.updateSessionRisk(client, sessionId, riskScore, riskLevel);
     // 🔴 CASE 1 — TERMINATED (Skip AI)
     if (session.status === "TERMINATED") {
 

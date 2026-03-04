@@ -2,6 +2,7 @@ CREATE TYPE user_role_enum AS ENUM ('USER', 'ADMIN');
 
 CREATE TYPE session_status_enum AS ENUM (
   'CREATED',
+  'READY',
   'IN_PROGRESS',
   'COMPLETED',
   'EVALUATED',

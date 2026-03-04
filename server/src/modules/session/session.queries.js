@@ -78,15 +78,18 @@ export async function insertAnswer(
 export async function getFullSessionData(client, sessionId) {
   const result = await client.query(
     `
-    SELECT 
-      q.id AS question_id,
-      q.question_text,
-      a.answer_text
-    FROM ai_questions q
-    LEFT JOIN answers a
-      ON q.id = a.question_id
-    WHERE q.session_id = $1
-    ORDER BY q.question_order ASC;
+   SELECT 
+  q.id AS question_id,
+  q.question_text,
+  q.question_order,
+  q.difficulty,
+  q.category,
+  a.answer_text
+FROM ai_questions q
+LEFT JOIN answers a
+  ON q.id = a.question_id
+WHERE q.session_id = $1
+ORDER BY q.question_order ASC;
     `,
     [sessionId]
   );
@@ -94,6 +97,20 @@ export async function getFullSessionData(client, sessionId) {
   return result.rows;
 }
 
+export async function startInterviewTimer(client, sessionId, durationSeconds) {
+  await client.query(
+    `
+    UPDATE interview_sessions
+    SET 
+      started_at = NOW(),
+      expires_at = NOW() + ($2 * INTERVAL '1 second'),
+      duration_seconds = $2,
+      updated_at = NOW()
+    WHERE id = $1
+    `,
+    [sessionId, durationSeconds]
+  );
+}
 
 export async function insertSessionAnalysis(
   client,
