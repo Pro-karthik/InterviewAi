@@ -19,6 +19,7 @@ import SetupPage from "./Pages/Interview/Setup/SetupPage";
 import TerminatedPage from "./Pages/Interview/Terminated/TerminatedPage";
 import EvaluatingPage from "./Pages/Interview/Evaluating/EvaluatingPage";
 import LiveInterviewPage from "./Pages/Interview/Live/LiveInterviewPage";
+import Settings from "./Pages/Settings/Settings";
 function App() {
   return (
     <BrowserRouter>
@@ -34,6 +35,7 @@ function App() {
           <Route path="/forgot" element={<Forgot />} />
           <Route path="/verifyotp" element={<VerifyOtp />} />
           <Route path="/resetpassword" element={<ResetPassword />} />
+          <Route path="/settings" element={<Settings/>}/>
 
           <Route path="/interview" element={<InterviewLayout />}>
             <Route path="start" element={<CreateInterview />} />
