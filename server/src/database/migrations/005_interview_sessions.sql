@@ -1,5 +1,6 @@
 CREATE TABLE interview_sessions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
   user_id UUID NOT NULL
     REFERENCES users(id)
     ON DELETE CASCADE,
@@ -8,6 +9,15 @@ CREATE TABLE interview_sessions (
   experience_level TEXT NOT NULL,
 
   status session_status_enum NOT NULL DEFAULT 'CREATED',
+
+  duration_seconds INTEGER DEFAULT 900,
+
+  started_at TIMESTAMP NULL,
+  expires_at TIMESTAMP NULL,
+  ended_at TIMESTAMP NULL,
+
+  total_questions INTEGER,
+  answered_questions INTEGER DEFAULT 0,
 
   overall_score NUMERIC,
   risk_score NUMERIC,
