@@ -18,6 +18,8 @@ import SetupPage from "./Pages/Interview/Setup/SetupPage";
 import TerminatedPage from "./Pages/Interview/Terminated/TerminatedPage";
 import EvaluatingPage from "./Pages/Interview/Evaluating/EvaluatingPage";
 import Settings from "./Pages/Settings/Settings"
+import ResultsPage from "./Pages/Results/ResultsPage";
+
 function App() {
   return (
     <BrowserRouter>
@@ -39,7 +41,12 @@ function App() {
 
           <Route path="/interview/device-check" element={<DeviceCheckPage />} />
 
-          <Route path="/interview/evaluating" element={<EvaluatingPage />} />  
+          <Route path="/interview/evaluating" element={<EvaluatingPage />} /> 
+
+          <Route path="/interview/results" element={<ResultsPage />} />  
+
+
+
           <Route path="/interview/terminated" element={<TerminatedPage />} />
 
 
