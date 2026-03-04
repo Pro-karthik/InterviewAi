@@ -4,7 +4,8 @@ import {
   evaluateSessionService,
   getSessionService,
   getSessionHistoryService,
-  getSessionHistoryByIdService
+  getSessionHistoryByIdService,
+  beginInterviewService
 } from "./session.service.js";
 
 
@@ -32,7 +33,7 @@ export async function beginInterview(req, res, next) {
     const { id } = req.params;
     const userId = req.user.id;
 
-    const result = await sessionService.beginInterviewService(id, userId);
+    const result = await beginInterviewService(id, userId);
 
     res.status(200).json(result);
   } catch (error) {
