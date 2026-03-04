@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import AuthLayout from "./Components/AuthLayout";
 import AuthFormWrapper from "./Components/AuthFormWrapper";
-import { VerifyOtp as verifyOtpApi } from "../../api/auth.api";
+import { verifyOtp as verifyOtpApi, resendOtp as resendOtpApi } from "../../api/auth.api";
 
 function VerifyOtp() {
   const navigate = useNavigate();
@@ -13,6 +13,7 @@ function VerifyOtp() {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [loading, setLoading] = useState(false);
   const [timer, setTimer] = useState(60);
+  const [verified, setVerified] = useState(false);
 
   const inputsRef = useRef([]);
 
@@ -24,11 +25,9 @@ function VerifyOtp() {
       progressClassName: "bg-white",
     };
 
-    if (type === "success") {
-      toast.success(message, options);
-    } else {
-      toast.error(message, options);
-    }
+    type === "success"
+      ? toast.success(message, options)
+      : toast.error(message, options);
   }, []);
 
   useEffect(() => {
@@ -36,6 +35,10 @@ function VerifyOtp() {
       navigate("/forgot", { replace: true });
     }
   }, [email, navigate]);
+
+  useEffect(() => {
+    inputsRef.current[0]?.focus();
+  }, []);
 
   useEffect(() => {
     if (timer === 0) return;
@@ -67,36 +70,64 @@ function VerifyOtp() {
 
   const handlePaste = (e) => {
     const pasteData = e.clipboardData.getData("text").trim();
+
     if (!/^\d{6}$/.test(pasteData)) return;
 
-    setOtp(pasteData.split(""));
+    const pastedOtp = pasteData.split("");
+    setOtp(pastedOtp);
+
     inputsRef.current[5]?.focus();
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+ const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    const finalOtp = otp.join("");
+  if (verified || loading) return;
 
-    if (finalOtp.length !== 6) {
-      return handleToast("Enter complete OTP");
-    }
+  const finalOtp = otp.join("");
 
-    try {
-      setLoading(true);
+  if (finalOtp.length !== 6) {
+    return handleToast("Enter complete OTP");
+  }
 
-      await verifyOtpApi({ email, otp: finalOtp });
+  try {
+    setLoading(true);
 
-      handleToast("OTP verified successfully", "success");
+    const res = await verifyOtpApi({ email, otp: finalOtp });
+
+    console.log("verify response:", res);
+
+    if (res.success) {
+      setVerified(true);
+
+      handleToast(res.message, "success");
 
       navigate("/resetpassword", { state: { email } });
+    }
+
+  } catch (err) {
+    console.log("verify error:", err);
+
+    setOtp(["", "", "", "", "", ""]);
+    inputsRef.current[0]?.focus();
+
+    handleToast(err?.response?.data?.message || "Invalid OTP");
+  } finally {
+    setLoading(false);
+  }
+};
+  const handleResendOtp = async () => {
+    try {
+      await resendOtpApi({ email });
+
+      handleToast("New OTP sent", "success");
+
+      setOtp(["", "", "", "", "", ""]);
+      setTimer(60);
+      inputsRef.current[0]?.focus();
 
     } catch (err) {
-      handleToast(
-        err?.response?.data?.message || "Invalid or expired OTP"
-      );
-    } finally {
-      setLoading(false);
+      handleToast(err?.response?.data?.message || "Failed to resend OTP");
     }
   };
 
@@ -124,10 +155,19 @@ function VerifyOtp() {
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || verified}
             className="w-full text-white p-3 rounded-xl bg-gradient-to-r from-[#FF7A2F] via-[#FFC7A6] to-[#F4E6DA] disabled:opacity-50"
           >
             {loading ? "Verifying..." : "Verify OTP"}
+          </button>
+
+          <button
+            type="button"
+            onClick={handleResendOtp}
+            disabled={timer > 0}
+            className="text-orange-500 text-sm"
+          >
+            {timer > 0 ? `Resend in ${timer}s` : "Resend OTP"}
           </button>
         </form>
       </AuthFormWrapper>

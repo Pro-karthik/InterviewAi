@@ -7,6 +7,7 @@ import {
   logoutController,
   sendotpController,
   verifyotpController,resetPasswordController,
+  resendOtpController,updateProfile
 } from "./users.controllers.js";
 import {
   authenticate,
@@ -29,9 +30,11 @@ router.post(
   loginController,
 );
 router.get("/profile", authenticate, getUserByIdController);
+router.patch("/updateprofile",updateProfile);
 router.post("/refresh", refreshController);
 router.post("/forgot",sendotpController);
 router.post("/verifyotp",verifyotpController);
+router.post("/resendotp",resendOtpController);
 router.post("/resetpassword",resetPasswordController);
 router.post("/logout", authenticate, logoutController);
 export default router;

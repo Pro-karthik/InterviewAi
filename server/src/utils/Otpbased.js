@@ -1,12 +1,9 @@
-import crypto from "crypto";
+import crypto from "crypto"
 
 export const generateOTP = () => {
-  return crypto.randomInt(100000, 1000000).toString();
+  return Math.floor(100000 + Math.random() * 900000).toString();
 };
 
 export const hashOTP = (otp) => {
-  return crypto
-    .createHash("sha256")
-    .update(otp + process.env.OTP_SECRET)
-    .digest("hex");
+  return crypto.createHash("sha256").update(otp).digest("hex");
 };

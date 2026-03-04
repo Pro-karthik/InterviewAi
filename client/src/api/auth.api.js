@@ -19,13 +19,23 @@ export const getProfile = async () => {
 export const forgotPassword = (data) =>{
   return axios.post("/users/forgot",data);
 }
-export const VerifyOtp =(data)=>{
-  axios.post("/users/verifyotp",data);
-}
 
 export const ResetPassword =(data) =>{
   axios.post("/users/resetpassword",data);
 }
+export const verifyOtp = async (data) => {
+  const response = await axios.post("/users/verifyotp", data);
+  return response.data;
+};
+
+export const resendOtp = async (data) => {
+  const response = await axios.post("/users/resend-otp", data);
+  return response.data;
+};
 
 export const logout = () =>
   axios.post('/users/logout');
+
+export const updateProfile = (data) => {
+  return axios.put("/users/updateprofile", data);
+};

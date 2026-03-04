@@ -8,7 +8,7 @@ import {
 import { SiMongodb, SiDocker } from "react-icons/si";
 import { MdDesignServices } from "react-icons/md";
 import { FiPlus, FiX } from "react-icons/fi";
-import {toast} from "react-toastify";
+import { toast } from "react-toastify";
 
 const SKILLS = [
   { name: "React", icon: <FaReact className="text-blue-500" /> },
@@ -50,25 +50,25 @@ const isValidSkillFormat = (skill) => {
   return true;
 };
 
-const SkillInput = ({ value = [], onChange }) => {
+const SkillInput = ({ value = [], onChange, loading }) => {
   const [customSkill, setCustomSkill] = useState("");
   const [showCustom, setShowCustom] = useState(false);
   const [error, setError] = useState("");
 
-   function handleToast(status, message){
-      if (status === "error") {
-        toast.error(message, {
-          className: "rounded-lg shadow-lg",
-          progressClassName: "bg-white",
-        });
-      }
-      else {
-        toast.success(message, {
-          className: "rounded-lg shadow-lg",
-          progressClassName: "bg-white",
-        });
-      }
-    };
+  function handleToast(status, message) {
+    if (status === "error") {
+      toast.error(message, {
+        className: "rounded-lg shadow-lg",
+        progressClassName: "bg-white",
+      });
+    }
+    else {
+      toast.success(message, {
+        className: "rounded-lg shadow-lg",
+        progressClassName: "bg-white",
+      });
+    }
+  };
 
   const toggleSkill = (skill) => {
     if (value.includes(skill)) {
@@ -76,7 +76,7 @@ const SkillInput = ({ value = [], onChange }) => {
       setError("");
       return;
     }
-   
+
 
     if (value.length >= MAX_SKILLS) {
       setError("You can select maximum 5 skills.");
@@ -101,9 +101,9 @@ const SkillInput = ({ value = [], onChange }) => {
     }
 
     const key = sanitized.replace(/\s/g, "");
-    const normalized =
-      SKILL_DICTIONARY[key] ||
-      sanitized.charAt(0).toUpperCase() + sanitized.slice(1);
+   const normalized =
+  SKILL_DICTIONARY[key] ??
+  sanitized.replace(/\b\w/g, (c) => c.toUpperCase());
 
     if (value.includes(normalized)) {
       // setError("Skill already selected.");
@@ -138,7 +138,7 @@ const SkillInput = ({ value = [], onChange }) => {
           const active = value.includes(skill.name);
 
           return (
-            <button
+            <button disabled={loading}
               key={skill.name}
               type="button"
               onClick={() => toggleSkill(skill.name)}
@@ -167,14 +167,14 @@ const SkillInput = ({ value = [], onChange }) => {
 
       {showCustom && (
         <div className="mt-4 flex gap-3">
-          <input
+          <input disabled={loading}
             type="text"
             placeholder="Enter custom skill..."
             value={customSkill}
             onChange={(e) => setCustomSkill(e.target.value)}
             className="flex-1 border rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#4D2C5E] outline-none"
           />
-          <button
+          <button disabled={loading}
             type="button"
             onClick={addCustomSkill}
             className="px-5 bg-[#4D2C5E] text-white rounded-lg"
