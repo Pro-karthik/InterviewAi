@@ -93,7 +93,7 @@ export const refreshAccessToken = async (refreshToken) => {
   try {
     decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
   } catch {
-    throw new ApiError(403, "Invalid refresh token");
+    throw new ApiError("Invalid refresh token",403);
   }
 
   const { rows } = await pool.query(
@@ -116,11 +116,11 @@ export const refreshAccessToken = async (refreshToken) => {
   }
 
   if (!matchedToken) {
-    throw new ApiError(403, "Refresh token not found");
+    throw new ApiError("Refresh token not found",403);
   }
 
   if (matchedToken.expires_at < new Date()) {
-    throw new ApiError(403, "Refresh token expired");
+    throw new ApiError("Refresh token expired",403);
   }
   await pool.query(revokeRefreshTokenQuery, [matchedToken.id]);
 

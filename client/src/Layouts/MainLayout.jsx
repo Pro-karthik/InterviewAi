@@ -5,7 +5,7 @@ function MainLayout({ children }) {
   const [isOpen, setIsOpen] = React.useState(false);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="flex min-h-screen bg-gray-50">
       <Sidebar isOpen={isOpen} setIsOpen={setIsOpen} />
 
       <main

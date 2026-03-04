@@ -16,8 +16,6 @@ import { useAuth } from "../context/AuthContext";
 const navItems = [
   { icon: MdOutlineDashboard, label: "Overview", url: "/dashboard" },
   { icon: IoTimeOutline, label: "History", url: "/history" },
-  { icon: HiOutlineDocumentText, label: "Statistics", url: "/statistics" },
-  { icon: IoNotificationsOutline, label: "Notifications", url: "/notifications" },
   { icon: IoSettingsOutline, label: "Settings", url: "/settings" },
 ];
 

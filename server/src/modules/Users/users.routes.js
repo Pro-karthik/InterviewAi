@@ -30,7 +30,7 @@ router.post(
   loginController,
 );
 router.get("/profile", authenticate, getUserByIdController);
-router.patch("/updateprofile",updateProfile);
+router.patch("/updateprofile", authenticate, updateProfile);
 router.post("/refresh", refreshController);
 router.post("/forgot",sendotpController);
 router.post("/verifyotp",verifyotpController);
