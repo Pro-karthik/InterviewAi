@@ -25,7 +25,7 @@ const EXPERIENCES = [
   },
 ];
 
-const ExperienceSelector = ({ value, onChange }) => {
+const ExperienceSelector = ({ value, onChange, loading }) => {
   return (
     <div className="h-full flex flex-col">
 
@@ -44,7 +44,7 @@ const ExperienceSelector = ({ value, onChange }) => {
           const active = value === exp.label;
 
           return (
-            <button
+            <button disabled={loading}
               key={exp.label}
               type="button"
               onClick={() => onChange(exp.label)}

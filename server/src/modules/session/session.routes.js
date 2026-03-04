@@ -7,7 +7,7 @@ const router = express.Router();
 
 //validation for create interview
 router.post(
-  "/create",
+  "/validate",
  
   validateCreateInterview,
   sessionController.validateInterviewController
