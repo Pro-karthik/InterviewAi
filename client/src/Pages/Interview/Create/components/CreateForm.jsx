@@ -2,6 +2,7 @@
   import SkillInput from "./SkillInput";
   import ExperienceSelector from "./ExperienceSelector";
   import {toast} from "react-toastify";
+  import {HashLoader} from "react-spinners"
 
   const CreateForm = ({ onSubmit, loading }) => {
     const [skills, setSkills] = useState([]);
@@ -40,16 +41,23 @@
           </p>
         </div>
 
-        <div className="flex flex-1 gap-20">
+        <div>
+          {loading && (
+            <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10">
+              <HashLoader color="#4D2C5E" size={60} />
+            </div>
+          )}
+        </div>
+        <div  className="flex flex-1 gap-20">
 
           {/* Skills Section */}
           <div className="flex-1">
-            <SkillInput value={skills} onChange={setSkills} />
+            <SkillInput value={skills} onChange={setSkills} loading={loading} />
           </div>
 
           {/* Experience Section */}
           <div className="w-[400px]">
-            <ExperienceSelector value={experience} onChange={setExperience} />
+            <ExperienceSelector value={experience} onChange={setExperience} loading={loading} />
           </div>
 
         </div>
@@ -64,7 +72,8 @@
                       hover:scale-[1.02] transition-all duration-200
                       disabled:opacity-50"
           >
-            {loading ? "Generating..." : "Start Interview →"}
+            
+            {loading ? "Validating..." : "Start Interview →"}
           </button>
         </div>
 

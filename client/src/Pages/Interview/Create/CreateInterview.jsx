@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import CreateForm from "./components/CreateForm";
-import { createSession } from "../../../api/session.api";
+import { validateSkills } from "../../../api/session.api";
 import { toast } from "react-toastify";
+import { SiLetterboxd } from "react-icons/si";
 
 const CreateInterview = () => {
   const navigate = useNavigate();
@@ -16,8 +17,15 @@ const CreateInterview = () => {
         skills,
         experience_level: experience,
       };
+      // const builtInSkills = ["React", "Node.js", "Python", "Java", "System Design", "DevOps", "MongoDB"];
+      // const skillcheck = skills.every((skill) =>
+      //   builtInSkills.includes(skill)
+      // );
 
-      await createSession(payload);
+      // if (!skillcheck) {
+      //   await createSession(payload);
+      // }
+      await validateSkills(payload);
 
       navigate("/interview/setup/instructions", {
         state: payload,
@@ -26,22 +34,22 @@ const CreateInterview = () => {
     } catch (error) {
       console.error(error);
 
-      var message =
+      let message =
         error?.response?.data?.message ||
         "Skill validation failed.";
 
       // alert(message)
       if (error?.response?.status === 429 || error?.response?.status === 503) {
-        var message = "Service is currently overloaded. Please try again later.";
+        message = "Service is currently overloaded. Please try again later.";
       }
-      if (`${error}`.includes("Network Error") || `${error}`.includes("timeout")) {
-        message = "Network error or timeout. Please check your connection and try again.";
+      if (error.code === "ECONNABORTED" || error.message === "Network Error") {
+        message = "Network error. Please check your connection.";
       }
       if (`${error}`.includes("rate limit") || `${error}`.includes("overloaded") || `${error}`.includes("quota")) {
         message = "Service is currently overloaded. Please try again later.";
       }
 
-      
+
 
       toast.error(message, {
         className: "rounded-lg shadow-lg",

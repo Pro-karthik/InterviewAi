@@ -1,8 +1,8 @@
 import axios from "./axios";
 
 // Create Interview Session
-export const createSession = (data) =>
-  axios.post("/session/create", data);
+export const validateSkills = (data) =>
+  axios.post("/session/validate", data);
 
 // (Optional – future ready)
 export const getSession = (id) =>
