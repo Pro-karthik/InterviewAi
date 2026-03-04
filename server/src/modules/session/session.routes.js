@@ -16,6 +16,8 @@ router.post(
 // Start Interview
 router.post("/interview/start", authenticate, sessionController.startInterview);
 
+router.post("/:id/begin", authenticate, sessionController.beginInterview);
+
 // Submit Answers
 router.post("/:id/submit", authenticate, sessionController.submitAnswers);
 

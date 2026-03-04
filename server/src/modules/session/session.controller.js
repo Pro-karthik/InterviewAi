@@ -27,6 +27,19 @@ export const startInterview = async (req, res, next) => {
   }
 };
 
+export async function beginInterview(req, res, next) {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+
+    const result = await sessionService.beginInterviewService(id, userId);
+
+    res.status(200).json(result);
+  } catch (error) {
+    next(error);
+  }
+}
+
 
 // 2️⃣ Submit Answers
 export const submitAnswers = async (req, res, next) => {
