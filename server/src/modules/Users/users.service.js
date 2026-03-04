@@ -15,7 +15,8 @@ import { ApiError } from "../../utils/ApiError.js";
   updateOtpAttemptsQuery,
   blockUserOtpQuery ,
   clearOtpQuery,
-  updatePasswordQuery
+  updatePasswordQuery,
+  updateUserProfileQuery,
 } from "./users.queries.js";
 import {
   generateToken,
@@ -229,4 +230,21 @@ export const resetPasswordService = async (email, password) => {
   const hashedPassword = await bcrypt.hash(password, 10);
 
   await pool.query(updatePasswordQuery, [hashedPassword, email]);
+};
+
+
+export const updateUserProfileService = async (userId, data) => {
+
+  const { name, gender, date_of_birth, phone, bio } = data;
+
+  const { rows } = await pool.query(updateUserProfileQuery, [
+    name,
+    gender,
+    date_of_birth,
+    phone,
+    bio,
+    userId
+  ]);
+
+  return rows[0];
 };

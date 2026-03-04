@@ -35,3 +35,7 @@ export const resendOtp = async (data) => {
 
 export const logout = () =>
   axios.post('/users/logout');
+
+export const updateProfile = (data) => {
+  return axios.put("/users/updateprofile", data);
+};

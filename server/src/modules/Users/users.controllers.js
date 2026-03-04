@@ -7,7 +7,8 @@ import {
   sendotpService,
   verifyotpService,
   resetPasswordService,
-  resendOtpService
+  resendOtpService,
+  updateUserProfileService
 } from "./users.service.js";
 
 export const registerController = async (req, res, next) => {
@@ -77,6 +78,31 @@ export const refreshController = async (req, res, next) => {
 
   } catch (err) {
     next(err);
+  }
+};
+
+export const updateProfile = async (req, res) => {
+
+  try {
+
+    const userId = req.user.id;
+
+    const updatedUser = await updateUserProfileService(
+      userId,
+      req.body
+    );
+
+    res.status(200).json({
+      success: true,
+      user: updatedUser
+    });
+
+  } catch (error) {
+
+    res.status(500).json({
+      message: error.message
+    });
+
   }
 };
 
