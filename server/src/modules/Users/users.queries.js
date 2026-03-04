@@ -10,7 +10,18 @@ export const updateLastLoginQuery = `
     UPDATE users SET updated_at = NOW() WHERE id = $1;
 `;
 export const findUserByIdQuery = `
-    select id, email, role,is_active,created_at from users where id = $1;
+    SELECT
+    id,
+    name,
+    email,
+    gender,
+    date_of_birth,
+    phone,
+    bio,
+    profile_picture,
+    created_at
+  FROM users
+  WHERE id = $1;
 `;
 
 export const insertRefreshTokenQuery = `
@@ -75,4 +86,32 @@ export const updatePasswordQuery = `
   UPDATE users
   SET password = $1
   WHERE email = $2
+`;
+export const updateUserProfileQuery = `
+  UPDATE users
+  SET
+    name = $1,
+    gender = $2,
+    date_of_birth = $3,
+    phone = $4,
+    bio = $5,
+    updated_at = NOW()
+  WHERE id = $6
+  RETURNING
+    id,
+    name,
+    email,
+    gender,
+    date_of_birth,
+    phone,
+    bio,
+    profile_picture
+`;
+
+export const updateProfilePictureQuery = `
+  UPDATE users
+  SET profile_picture = $1,
+      updated_at = NOW()
+  WHERE id = $2
+  RETURNING profile_picture
 `;

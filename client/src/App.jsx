@@ -17,6 +17,7 @@ import CreateInterview from "./Pages/Interview/Create/CreateInterview";
 import SetupPage from "./Pages/Interview/Setup/SetupPage";
 import TerminatedPage from "./Pages/Interview/Terminated/TerminatedPage";
 import EvaluatingPage from "./Pages/Interview/Evaluating/EvaluatingPage";
+import Settings from "./Pages/Settings/Settings"
 function App() {
   return (
     <BrowserRouter>
@@ -46,6 +47,7 @@ function App() {
 
 
           <Route path="/interview/devicecheck" element={<DeviceCheckPage />} />
+          <Route path="/settings" element={<Settings/>}/>
            <Route path="*" element={<NotFound />} />
       </Routes>
       </AuthProvider>

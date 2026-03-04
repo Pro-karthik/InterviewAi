@@ -1,8 +1,10 @@
 import React from 'react'
-
+import ProfilePage from './Components/ProfilePage'
 function Settings() {
   return (
-    <div>Settings</div>
+    <>
+    <ProfilePage/>
+    </>
   )
 }
 
