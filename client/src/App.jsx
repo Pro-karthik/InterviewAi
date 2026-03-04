@@ -18,6 +18,9 @@ import CreateInterview from "./Pages/Interview/Create/CreateInterview";
 import SetupPage from "./Pages/Interview/Setup/SetupPage";
 import TerminatedPage from "./Pages/Interview/Terminated/TerminatedPage";
 import EvaluatingPage from "./Pages/Interview/Evaluating/EvaluatingPage";
+import Settings from "./Pages/Settings/Settings"
+import ResultsPage from "./Pages/Results/ResultsPage";
+
 import LiveInterviewPage from "./Pages/Interview/Live/LiveInterviewPage";
 import Settings from "./Pages/Settings/Settings";
 function App() {
@@ -33,8 +36,10 @@ function App() {
           <Route path="/history" element={<HistoryPage />} />
           <Route path="/session/:id" element={<SessionDetail />} />
           <Route path="/forgot" element={<Forgot />} />
-          <Route path="/verifyotp" element={<VerifyOtp />} />
-          <Route path="/resetpassword" element={<ResetPassword />} />
+          <Route path="/verifyotp" element={<VerifyOtp />} />          
+          <Route path="/resetpassword" element={<ResetPassword />}/>
+
+         
           <Route path="/settings" element={<Settings/>}/>
 
           <Route path="/interview" element={<InterviewLayout />}>
@@ -44,6 +49,7 @@ function App() {
             <Route path="live/:id" element={<LiveInterviewPage />} />
             <Route path="evaluating" element={<EvaluatingPage />} />
             <Route path="terminated" element={<TerminatedPage />} />
+            <Route path="/results" element={<ResultsPage />} />  
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
