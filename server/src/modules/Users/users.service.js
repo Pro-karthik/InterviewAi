@@ -176,24 +176,22 @@ export const sendotpService = async (email) => {
 export const verifyotpService = async (email, otp) => {
   const { rows } = await pool.query(getUserByEmailQuery, [email]);
 
-  if (rows.length === 0) throw new ApiError("User not found", 404);
+  if (!rows.length) throw new Error("User not found");
 
   const user = rows[0];
   const now = new Date();
 
-  // Block check
   if (user.otp_block_until && now < user.otp_block_until) {
     throw new Error("Account temporarily blocked. Try later.");
   }
 
-  // Expiry check
-  if (!user.otp_expires || now > user.otp_expires) {
+  if (!user.otp_expires || now > new Date(user.otp_expires)) {
     throw new Error("OTP expired. Request new one.");
   }
 
-  const hashedOtp = hashOTP(otp);
+  const hashedOtp = hashOTP(otp.trim());
 
-  if (!user.otp || hashedOtp !== user.otp) {
+  if (hashedOtp !== user.otp) {
     const attempts = user.otp_attempts + 1;
 
     if (attempts >= 5) {
@@ -203,11 +201,27 @@ export const verifyotpService = async (email, otp) => {
     }
 
     await pool.query(updateOtpAttemptsQuery, [attempts, email]);
-    throw new Error("Invalid OTP");
+
+    throw new Error("Invalid OTP"); // ✅ correct
   }
 
-  // Success
   await pool.query(clearOtpQuery, [email]);
+
+  return true;
+};
+
+export const resendOtpService = async (email) => {
+  const { rows } = await pool.query(getUserByEmailQuery, [email]);
+
+  if (!rows.length) throw new Error("User not found");
+
+  const otp = generateOTP();
+  const hashedOtp = hashOTP(otp);
+  const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
+
+  await pool.query(updateOtpQuery, [hashedOtp, expiresAt, email]);
+
+  await sendOtpEmail(email, otp);
 
   return true;
 };

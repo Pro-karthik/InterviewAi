@@ -6,7 +6,8 @@ import {
   getUserById,
   sendotpService,
   verifyotpService,
-  resetPasswordService
+  resetPasswordService,
+  resendOtpService
 } from "./users.service.js";
 
 export const registerController = async (req, res, next) => {
@@ -119,20 +120,37 @@ export const verifyotpController = async (req, res, next) => {
   try {
     const { email, otp } = req.body;
 
-    if (!email || !otp) {
-      return res.status(400).json({
-        message: "Email and OTP are required",
-      });
-    }
-
     await verifyotpService(email, otp);
 
     return res.status(200).json({
-      message: "OTP verified successfully",
+      success: true,
+      message: "OTP verified successfully"
     });
 
-  } catch (error) {
-    return next(error);
+  } catch (err) {
+    return next(err);
+  }
+};
+export const resendOtpController = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: "Email is required",
+      });
+    }
+
+    await resendOtpService(email);
+
+    return res.status(200).json({
+      success: true,
+      message: "New OTP sent successfully",
+    });
+
+  } catch (err) {
+    return next(err);
   }
 };
 export const resetPasswordController = async (req, res, next) => {
