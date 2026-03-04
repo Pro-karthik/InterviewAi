@@ -4,9 +4,13 @@ import axios from "./axios";
 export const createSession = (data) =>
   axios.post("/session/create", data);
 
-// (Optional – future ready)
-export const getSession = (id) =>
-  axios.get(`/session/${id}`);
 
 export const deleteSession = (id) =>
   axios.delete(`/session/${id}`);
+
+export const getSession =  (sessionId) => 
+   axios.get(`/interview/${sessionId}`);
+
+export const beginInterview = (sessionId) => 
+  axios.post(`/interview/${sessionId}/begin`);
+ 
