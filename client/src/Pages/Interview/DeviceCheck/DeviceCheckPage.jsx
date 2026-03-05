@@ -18,7 +18,7 @@ const DeviceCheckPage = () => {
   const { skills, experience, setSessionId } = useInterview();
   const navigate = useNavigate();
   const { stream, error } = useCameraStream();
-  const [step, setStep] = useState(3);
+  const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
 
   const handleCreateSession = async (e) => {
