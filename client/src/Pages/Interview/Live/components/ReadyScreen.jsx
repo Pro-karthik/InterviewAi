@@ -1,19 +1,8 @@
-import { beginInterview } from "../../../../api/session.api"
-import { useNavigate } from "react-router-dom";
+import { useLiveInterview } from "../context/LiveInterviewContext";
 
-const ReadyScreen = ({ sessionId, skill, questionCount }) => {
-  const navigate = useNavigate();
+const ReadyScreen = ({  skill, questionCount }) => {
 
-  const handleStart = async () => {
-    try {
-      await beginInterview(sessionId);
-
-      // reload same page to switch to interview mode
-      navigate(`/interview/live/${sessionId}`);
-    } catch (error) {
-      console.error("Failed to start interview", error);
-    }
-  };
+  const { startInterview } = useLiveInterview();
 
   return (
     <div className="h-screen flex items-center justify-center bg-gray-100">
@@ -46,7 +35,7 @@ const ReadyScreen = ({ sessionId, skill, questionCount }) => {
         </div>
 
         <button
-          onClick={handleStart}
+          onClick={startInterview}
           className="w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800"
         >
           Start Interview

@@ -31,7 +31,7 @@ router.get("/history", authenticate, sessionController.getSessionHistory);
 router.get("/history/:id", authenticate, sessionController.getSessionHistoryById);
 
 // Get Session
-router.get("/:id", authenticate, sessionController.getSession);
+router.get("/:id/details", authenticate, sessionController.getSession);
 
 
 

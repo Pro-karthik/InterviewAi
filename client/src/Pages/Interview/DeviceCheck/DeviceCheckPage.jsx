@@ -1,8 +1,12 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import useCameraStream from "../../../hooks/useCameraStream";
 import CameraCheck from "./components/CameraCheck";
 import AudioCheck from "./components/AudioCheck";
 import StepIndicator from "./components/StepIndicator";
+import { useInterview } from "../../../context/InterviewContext";
+import { createSession } from "../../../api/session.api";
+import { HashLoader } from "react-spinners";
 
 const steps = [
   { id: 1, label: "Camera Check" },
@@ -11,8 +15,33 @@ const steps = [
 ];
 
 const DeviceCheckPage = () => {
+  const { skills, experience, setSessionId } = useInterview();
+  const navigate = useNavigate();
   const { stream, error } = useCameraStream();
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(3);
+  const [loading, setLoading] = useState(false);
+
+  const handleCreateSession = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      let skill = Array.isArray(skills) ? skills.join(",") : "";
+      const response = await createSession({ skills: skill, experience });
+      const sessionId = response?.data?.sessionId;
+
+      if (sessionId) {
+        setSessionId(sessionId);
+        navigate(`/interview/live/${sessionId}`);
+      } else {
+        alert("No session ID returned. Please try again.");
+      }
+    } catch (err) {
+      console.error("Error creating session:", err);
+      alert("Failed to create interview session. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (error) {
     return (
@@ -34,13 +63,17 @@ const DeviceCheckPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA] px-6 py-14">
+    <div className="min-h-screen bg-[#F8F9FA] px-6 py-14 relative">
+      {/* Loader Overlay */}
+      {loading && (
+        <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-50">
+          <HashLoader color="#5B2C6F" size={60} />
+        </div>
+      )}
 
       {/* Header */}
       <div className="max-w-6xl mx-auto mb-12">
-        <h1 className="text-3xl font-bold text-gray-900 mb-3">
-          Device Setup
-        </h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-3">Device Setup</h1>
         <p className="text-gray-500 text-sm max-w-2xl">
           Before starting your interview, let's ensure your camera and
           microphone are working properly.
@@ -49,29 +82,23 @@ const DeviceCheckPage = () => {
 
       {/* Layout */}
       <div className="max-w-6xl mx-auto flex gap-16">
-
         {/* LEFT - Vertical Stepper */}
         <StepIndicator steps={steps} currentStep={step} />
 
         {/* RIGHT - Content */}
         <div className="flex-1">
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-10 min-h-[450px]">
-
             {step === 1 && stream && (
-              <CameraCheck
-                stream={stream}
-                onNext={() => setStep(2)}
-              />
+              <CameraCheck stream={stream} onNext={() => setStep(2)} />
             )}
 
-            {step === 2 && (
-              <AudioCheck
-                onNext={() => setStep(3)}
-              />
-            )}
+            {step === 2 && <AudioCheck onNext={() => setStep(3)} />}
 
             {step === 3 && (
-              <div className="text-center space-y-6">
+              <form
+                onSubmit={handleCreateSession}
+                className="text-center space-y-6"
+              >
                 <div className="w-16 h-16 mx-auto flex items-center justify-center rounded-full bg-[#F4ECF7] text-[#5B2C6F] text-2xl font-bold">
                   ✓
                 </div>
@@ -85,12 +112,15 @@ const DeviceCheckPage = () => {
                   your AI-powered interview session.
                 </p>
 
-                <button className="mt-6 px-8 py-3 bg-[#5B2C6F] hover:bg-[#4A235A] text-white rounded-xl font-semibold shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#5B2C6F]/30">
-                  Start Interview
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="mt-6 px-8 py-3 bg-[#5B2C6F] hover:bg-[#4A235A] text-white rounded-xl font-semibold shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#5B2C6F]/30 disabled:opacity-50"
+                >
+                  {loading ? "Starting..." : "Start Interview"}
                 </button>
-              </div>
+              </form>
             )}
-
           </div>
         </div>
       </div>

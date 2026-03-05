@@ -14,11 +14,11 @@ export const startInterview = async (req, res, next) => {
   try {
      const userId = req.user.id;
   
-    const { skill, experience } = req.body;
+    const { skills, experience } = req.body;
 
     const result = await startInterviewService(
       userId,
-      skill,
+      skills,
       experience
     );
 
@@ -90,7 +90,7 @@ export const getSession = async (req, res, next) => {
     const sessionId = req.params.id;
     const userId = req.user.id;
    
-
+    console.log("Fetching session details for sessionId:", sessionId, "userId:", userId);
     const result = await getSessionService(
       sessionId,
       userId

@@ -1,95 +1,77 @@
-const QuestionBreakdown = ({ answers }) => {
+import { FaBrain } from "react-icons/fa6";
+const ScoreItem = ({ label, value }) => (
+  <div className="bg-gray-50 rounded-md p-3">
+    <p className="text-xs text-gray-500">{label}</p>
+    <p className="text-sm font-semibold text-gray-900">
+      {value ?? "—"}
+    </p>
+  </div>
+);
+
+const QuestionBreakdown = ({ answers = [] }) => {
+
+  if (!answers.length) {
+    return (
+      <div className="bg-white border rounded-lg shadow-sm p-6 mt-6">
+        <h2 className="text-lg font-semibold text-gray-900 flex items-center">
+        <FaBrain className="text-[#4D2C5E] inline-block w-5 h-5 mr-2" />
+          Question Analysis 
+        </h2>
+
+        <div className="mt-6 text-gray-500 text-sm">
+          No question data available.
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="mt-12">
+    <div className="bg-white border rounded-lg shadow-sm p-6 mt-6">
 
-      <h2 className="text-2xl font-semibold text-gray-900 mb-6">
+      <h2 className="text-lg font-semibold text-gray-900 mb-6 flex items-center">
+        <FaBrain className="text-[#4D2C5E] inline-block w-5 h-5 mr-2" />
         Question Analysis
       </h2>
 
-      <div className="space-y-8">
+      <div className="space-y-5">
 
         {answers.map((ans, index) => (
 
           <div
             key={ans.question_id}
-            className="bg-white border border-gray-100 rounded-xl p-6 shadow-sm"
+            className="border rounded-md p-5"
           >
 
-            {/* Question Header */}
+            {/* Header */}
+            <div className="flex justify-between mb-4">
 
-            <div className="flex justify-between items-start mb-4">
+              <p className="font-medium text-gray-900">
+                <strong>Question {index + 1}: &nbsp; </strong>
 
-              <div>
-                <p className="text-xs text-gray-400 uppercase tracking-wide">
-                  Question {index + 1}
-                </p>
+              Lorem ipsum dolor sit amet consectetur adipisicing elit. Commodi tempore nam magnam nostrum voluptates laudantium fuga placeat ab provident sunt aliquam distinctio similique expedita incidunt, vitae accusantium, tempora nisi ipsam!z
+              </p>
 
-                <h4 className="text-lg font-medium text-gray-900 mt-1">
-                  {ans.question || "Interview Question"}
-                </h4>
-              </div>
-
-              <div className="bg-purple-50 text-[#4D2C5E] font-semibold px-4 py-2 rounded-lg">
-                {ans.total_score} / 50
-              </div>
+              <p className="text-sm font-semibold text-gray-900">
+                Score: {ans.total_score ?? "—"}
+              </p>
 
             </div>
 
-            {/* Score Table */}
+            {/* Score Grid */}
+            <div className="grid grid-cols-5 gap-3 text-center mb-4">
 
-            <div className="grid grid-cols-5 gap-4 text-center border border-gray-100 rounded-lg overflow-hidden">
-
-              <div className="bg-gray-50 p-3">
-                <p className="text-xs text-gray-500">Technical</p>
-                <p className="font-semibold text-gray-800">
-                  {ans.technical_score}
-                </p>
-              </div>
-
-              <div className="bg-gray-50 p-3">
-                <p className="text-xs text-gray-500">Depth</p>
-                <p className="font-semibold text-gray-800">
-                  {ans.depth_score}
-                </p>
-              </div>
-
-              <div className="bg-gray-50 p-3">
-                <p className="text-xs text-gray-500">Clarity</p>
-                <p className="font-semibold text-gray-800">
-                  {ans.clarity_score}
-                </p>
-              </div>
-
-              <div className="bg-gray-50 p-3">
-                <p className="text-xs text-gray-500">Problem Solving</p>
-                <p className="font-semibold text-gray-800">
-                  {ans.problem_solving_score}
-                </p>
-              </div>
-
-              <div className="bg-gray-50 p-3">
-                <p className="text-xs text-gray-500">Communication</p>
-                <p className="font-semibold text-gray-800">
-                  {ans.communication_score}
-                </p>
-              </div>
+              <ScoreItem label="Technical" value={ans.technical_score} />
+              <ScoreItem label="Depth" value={ans.depth_score} />
+              <ScoreItem label="Clarity" value={ans.clarity_score} />
+              <ScoreItem label="Problem" value={ans.problem_solving_score} />
+              <ScoreItem label="Communication" value={ans.communication_score} />
 
             </div>
 
             {/* Feedback */}
-
-            <div className="mt-4">
-
-              <p className="text-sm text-gray-500 uppercase tracking-wide">
-                AI Feedback
-              </p>
-
-              <p className="text-gray-700 mt-1 leading-relaxed">
-                {ans.feedback}
-              </p>
-
-            </div>
+            <p className="text-sm text-gray-600 leading-relaxed">
+              {ans.feedback || "—"}
+            </p>
 
           </div>
 
