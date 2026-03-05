@@ -11,6 +11,7 @@ import {
   IoMenu,
 } from "react-icons/io5";
 import { HiOutlineDocumentText } from "react-icons/hi";
+import LogoForAi from "../Pages/Auth/Components/LogoForAi";
 import { useAuth } from "../context/AuthContext";
 
 const navItems = [
@@ -112,22 +113,32 @@ function Sidebar({ isOpen, setIsOpen }) {
         ${!isOpen ? "cursor-pointer" : ""}`}
     >
       {/* HEADER */}
-      <div className="flex items-center justify-between px-4 py-5">
-        <img src={logo} alt="logo" className="w-8 object-contain" />
+      {/* HEADER */}
+<div className="flex items-center justify-between px-4 py-5">
 
-        {expanded && (
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsOpen(false);
-            }}
-            className="p-2 rounded-md hover:bg-gray-100 transition"
-          >
-            <IoMenu size={20} />
-          </button>
-        )}
-      </div>
+  {/* Logo */}
+  <div className="flex items-center">
+    {expanded ? (
+      <LogoForAi size="md" />
+    ) : (
+      <img src={logo} alt="logo" className="w-8 h-8 object-contain mx-auto" />
+    )}
+  </div>
 
+  {/* Collapse Button */}
+  {expanded && (
+    <button
+      onClick={(e) => {
+        e.stopPropagation();
+        setIsOpen(false);
+      }}
+      className="p-2 rounded-md hover:bg-gray-100 transition"
+    >
+      <IoMenu size={20} />
+    </button>
+  )}
+
+</div>
       {/* START BUTTON */}
       <div className="px-3">
         <Link to="/interview/start"

@@ -1,31 +1,31 @@
 import React, { useState, useCallback, useEffect } from "react";
 import AuthLayout from "./Components/AuthLayout";
 import AuthFormWrapper from "./Components/AuthFormWrapper";
-import { AiOutlineUser } from "react-icons/ai";
+import { AiOutlineUser, AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import { GoLock } from "react-icons/go";
-import OauthButtons from "./Components/OauthButtons";
 import { Link, useNavigate } from "react-router-dom";
-import { loginUser, getProfile } from "../../api/auth.api"; // ✅ added getProfile
+import { loginUser, getProfile } from "../../api/auth.api";
+import axios from "../../api/axios";
 import { useAuth } from "../../context/AuthContext";
 import { toast } from "react-toastify";
 
 function SignIn() {
   const navigate = useNavigate();
-  const { accessToken, setAccessToken, setUser } = useAuth(); // ✅ added setUser
+  const { accessToken, setAccessToken, setUser, loading: authLoading } = useAuth();
 
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
 
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
 
   useEffect(() => {
-    if (accessToken) {
+    if (!authLoading && accessToken) {
       navigate("/dashboard", { replace: true });
     }
-  }, [accessToken, navigate]);
+  }, [authLoading, accessToken, navigate]);
 
   const handleToast = useCallback((message, type) => {
     if (!message) return;
@@ -35,11 +35,9 @@ function SignIn() {
       progressClassName: "bg-green-300",
     };
 
-    if (type === "success") {
-      toast.success(message, options);
-    } else {
-      toast.error(message, options);
-    }
+    type === "success"
+      ? toast.success(message, options)
+      : toast.error(message, options);
   }, []);
 
   const handleChange = (e) => {
@@ -55,11 +53,9 @@ function SignIn() {
     e.preventDefault();
 
     if (loading) return;
-    setError("");
 
     if (!formData.email || !formData.password) {
-      setError("Please fill all fields");
-      handleToast("Please fill all fields", "failure");
+      handleToast("Please fill all fields", "error");
       return;
     }
 
@@ -68,21 +64,28 @@ function SignIn() {
 
       const { data } = await loginUser(formData);
 
-      setAccessToken(data.accessToken);
+      const token = data.accessToken;
 
-      // ✅ FIX: fetch profile immediately
+      // 🔑 set axios header immediately
+      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+
+      // store token in context
+      setAccessToken(token);
+
+      // fetch profile
       const profileRes = await getProfile();
+
       setUser(profileRes.data);
 
       handleToast("Login Successful", "success");
+
       navigate("/dashboard", { replace: true });
 
     } catch (err) {
       const message =
         err?.response?.data?.message || "Login failed. Please try again.";
 
-      setError(message);
-      handleToast(message, "failure");
+      handleToast(message, "error");
     } finally {
       setLoading(false);
     }
@@ -94,6 +97,7 @@ function SignIn() {
         <h3 className="text-xl font-bold mb-2 text-center">LOGIN</h3>
 
         <form className="space-y-4" onSubmit={handleSubmit}>
+
           <div className="relative">
             <AiOutlineUser className="absolute left-3 top-1/2 -translate-y-1/2" />
             <input
@@ -102,40 +106,50 @@ function SignIn() {
               placeholder="Email"
               value={formData.email}
               onChange={handleChange}
-              className="text-black w-full placeholder:text-black rounded-xl p-3 pl-10 bg-orange-50 focus:outline-none focus:ring-2 focus:ring-orange-400"
+              className="text-black w-full rounded-xl p-3 pl-10 bg-orange-50 focus:outline-none focus:ring-2 focus:ring-orange-400"
             />
           </div>
 
           <div className="relative">
             <GoLock className="absolute left-3 top-1/2 -translate-y-1/2" />
+
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               name="password"
               placeholder="Password"
               value={formData.password}
               onChange={handleChange}
-              className="text-black w-full placeholder:text-black rounded-xl p-3 pl-10 bg-orange-50 focus:outline-none focus:ring-2 focus:ring-orange-400"
+              className="text-black w-full rounded-xl p-3 pl-10 pr-10 bg-orange-50 focus:outline-none focus:ring-2 focus:ring-orange-400"
             />
+
+            <button
+              type="button"
+              onClick={() => setShowPassword((prev) => !prev)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 hover:text-black"
+            >
+              {showPassword ? <AiOutlineEyeInvisible /> : <AiOutlineEye />}
+            </button>
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-gradient-to-r from-[#FF7A2F] via-[#FFC7A6] to-[#F4E6DA] text-white p-3 rounded-lg transition justify-center items-center mx-auto block disabled:opacity-50"
+            className="w-full bg-gradient-to-r from-[#FF7A2F] via-[#FFC7A6] to-[#F4E6DA] text-white p-3 rounded-lg disabled:opacity-50"
           >
             {loading ? "Signing In..." : "Sign In"}
           </button>
 
           <div className="text-center text-sm">
-            You don't have an account?
+            Don't have an account?
             <Link to="/signup" className="text-blue-500 ml-1">
               Sign Up
             </Link>
           </div>
 
           <div className="text-center text-sm text-blue-500">
-            <Link to="/forgot">Forgot Password ? </Link>
+            <Link to="/forgot">Forgot Password?</Link>
           </div>
+
         </form>
       </AuthFormWrapper>
     </AuthLayout>

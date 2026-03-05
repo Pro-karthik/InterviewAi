@@ -30,7 +30,7 @@ export const registerUser = async (email, password) => {
   const { rows } = await pool.query(findUserByEmailQuery, [email]);
 
   if (rows[0]) {
-    throw new ApiError(400, "Email already exists");
+    throw new ApiError("Email already exists",400);
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
@@ -63,10 +63,10 @@ export const loginUser = async (email, password) => {
   const { rows } = await pool.query(findUserByEmailQuery, [email]);
   const user = rows[0];
 
-  if (!user) throw new ApiError(400, "Invalid credentials");
+  if (!user) throw new ApiError("Invalid credentials",400);
 
   const isValid = await comparePassword(password, user.password);
-  if (!isValid) throw new ApiError(400, "Invalid credentials");
+  if (!isValid) throw new ApiError("Invalid credentials",400);
 
   await pool.query(updateLastLoginQuery, [user.id]);
 

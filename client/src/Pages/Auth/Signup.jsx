@@ -1,7 +1,11 @@
 import React, { useState, useCallback, useEffect } from "react";
 import AuthLayout from "./Components/AuthLayout";
 import AuthFormWrapper from "./Components/AuthFormWrapper";
-import { AiOutlineUser } from "react-icons/ai";
+import {
+  AiOutlineUser,
+  AiOutlineEye,
+  AiOutlineEyeInvisible,
+} from "react-icons/ai";
 import { GoLock } from "react-icons/go";
 import { Link, useNavigate } from "react-router-dom";
 import { registerUser, getProfile } from "../../api/auth.api";
@@ -10,7 +14,7 @@ import { toast } from "react-toastify";
 
 function Signup() {
   const navigate = useNavigate();
-  const { accessToken, setAccessToken, setUser } = useAuth();
+  const { accessToken, setAccessToken, setUser, loading: authLoading } = useAuth();
 
   const [formData, setFormData] = useState({
     email: "",
@@ -18,15 +22,17 @@ function Signup() {
     confirmPassword: "",
   });
 
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  // Redirect if already logged in
+  const [loading, setLoading] = useState(false);
+
+  // Wait for AuthContext initialization
   useEffect(() => {
-    if (accessToken) {
+    if (!authLoading && accessToken) {
       navigate("/dashboard", { replace: true });
     }
-  }, [accessToken, navigate]);
+  }, [authLoading, accessToken, navigate]);
 
   const handleChange = (e) => {
     setFormData((prev) => ({
@@ -69,31 +75,29 @@ function Signup() {
 
     const validationError = validateForm();
     if (validationError) {
-      setError(validationError);
       handleToast(validationError);
       return;
     }
 
     try {
       setLoading(true);
-      setError("");
 
-      // 1️⃣ Register user
       const { data } = await registerUser({
         email: formData.email,
         password: formData.password,
       });
 
-      // 2️⃣ Store access token
+      // Save access token in context
       setAccessToken(data.accessToken);
 
-      // 3️⃣ Fetch user profile
+      // Fetch user profile
       const profileRes = await getProfile();
       setUser(profileRes.data);
 
       handleToast("Account created successfully", "success");
 
       navigate("/dashboard", { replace: true });
+
     } catch (err) {
       let message =
         err?.response?.data?.message ||
@@ -103,8 +107,8 @@ function Signup() {
         message = message[0];
       }
 
-      setError(message);
       handleToast(message);
+
     } finally {
       setLoading(false);
     }
@@ -114,45 +118,74 @@ function Signup() {
     <AuthLayout>
       <AuthFormWrapper>
         <h2 className="text-2xl font-bold text-center mb-4">SIGN UP</h2>
+
         <p className="text-gray-600 text-sm text-center mb-5">
           Create your account to get started
         </p>
 
         <form className="space-y-4" onSubmit={handleSubmit}>
+          
           <div className="relative">
             <AiOutlineUser className="absolute left-3 top-1/2 -translate-y-1/2" />
+
             <input
               type="email"
               name="email"
               placeholder="Email"
               value={formData.email}
               onChange={handleChange}
-              className="rounded-md w-full p-3 pl-10 placeholder:text-black bg-orange-50 focus:outline-none focus:ring-2 focus:ring-orange-400"
+              className="rounded-md w-full p-3 pl-10 bg-orange-50 focus:outline-none focus:ring-2 focus:ring-orange-400"
             />
           </div>
 
+          {/* Password */}
           <div className="relative">
             <GoLock className="absolute left-3 top-1/2 -translate-y-1/2" />
+
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               name="password"
               placeholder="Password"
               value={formData.password}
               onChange={handleChange}
-              className="rounded-xl p-3 w-full pl-10 bg-orange-50 placeholder:text-black focus:outline-none focus:ring-2 focus:ring-orange-400"
+              className="rounded-xl p-3 w-full pl-10 pr-10 bg-orange-50 focus:outline-none focus:ring-2 focus:ring-orange-400"
             />
+
+            <button
+              type="button"
+              onClick={() => setShowPassword((prev) => !prev)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 hover:text-black"
+            >
+              {showPassword ? <AiOutlineEyeInvisible /> : <AiOutlineEye />}
+            </button>
           </div>
 
+          {/* Confirm Password */}
           <div className="relative">
             <GoLock className="absolute left-3 top-1/2 -translate-y-1/2" />
+
             <input
-              type="password"
+              type={showConfirmPassword ? "text" : "password"}
               name="confirmPassword"
               placeholder="Confirm Password"
               value={formData.confirmPassword}
               onChange={handleChange}
-              className="rounded-xl p-3 pl-10 w-full bg-orange-50 placeholder:text-black focus:outline-none focus:ring-2 focus:ring-orange-400"
+              className="rounded-xl p-3 pl-10 pr-10 w-full bg-orange-50 focus:outline-none focus:ring-2 focus:ring-orange-400"
             />
+
+            <button
+              type="button"
+              onClick={() =>
+                setShowConfirmPassword((prev) => !prev)
+              }
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 hover:text-black"
+            >
+              {showConfirmPassword ? (
+                <AiOutlineEyeInvisible />
+              ) : (
+                <AiOutlineEye />
+              )}
+            </button>
           </div>
 
           <button
@@ -169,6 +202,7 @@ function Signup() {
               Sign In
             </Link>
           </div>
+
         </form>
       </AuthFormWrapper>
     </AuthLayout>

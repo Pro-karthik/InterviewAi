@@ -43,10 +43,10 @@ export const AuthProvider = ({ children }) => {
 
       } catch (err) {
 
-        if (err.response?.status === 401 && isMounted) {
-          setAccessToken(null);
-          setUser(null);
-        }
+        if (isMounted) {
+    setAccessToken(null);
+    setUser(null);
+  }
 
       } finally {
         if (isMounted) setLoading(false);

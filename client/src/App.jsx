@@ -19,6 +19,7 @@ import SetupPage from "./Pages/Interview/Setup/SetupPage";
 import TerminatedPage from "./Pages/Interview/Terminated/TerminatedPage";
 import EvaluatingPage from "./Pages/Interview/Evaluating/EvaluatingPage";
 import Settings from "./Pages/Settings/Settings"
+import ProtectedRoute from "./Pages/Auth/Components/ProtectedRoute";
 import ResultPage from "./Pages/Results/ResultPage";
 
 import LiveInterviewPage from "./Pages/Interview/Live/LiveInterviewPage";
@@ -40,7 +41,7 @@ function App() {
           <Route path="/resetpassword" element={<ResetPassword />}/>
 
          
-          <Route path="/settings" element={<Settings/>}/>
+          <Route path="/settings" element={<ProtectedRoute><Settings/></ProtectedRoute>}/>
 
           <Route path="/interview" element={<InterviewLayout />}>
             <Route path="start" element={<CreateInterview />} />
