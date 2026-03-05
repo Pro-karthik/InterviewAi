@@ -1,33 +1,37 @@
 import { useEffect, useRef } from "react";
 import { emitMetric } from "../monitoring/emitMetric";
 
-const useTabSecurity = () => {
+const DEBOUNCE_TIME = 1000; // 1 second
+
+const useTabSecurity = (sessionId, enabled = true) => {
   const lastViolationTimeRef = useRef(0);
-  const DEBOUNCE_TIME = 1000; // 1 second
 
   const emitDebounced = (event) => {
+    if (!enabled || !sessionId) return;
+
     const now = Date.now();
 
     if (now - lastViolationTimeRef.current < DEBOUNCE_TIME) {
-      return; // Ignore rapid duplicate events
+      return;
     }
 
     lastViolationTimeRef.current = now;
 
-    emitMetric({
+    emitMetric(sessionId, {
       ...event,
       timestamp: now
     });
   };
 
   useEffect(() => {
+    if (!enabled) return;
 
     const handleVisibilityChange = () => {
       if (document.hidden) {
         emitDebounced({
           source: "SYSTEM",
           type: "TAB_VISIBILITY",
-          state: "HIDDEN",
+          state: "HIDDEN"
         });
       }
     };
@@ -36,7 +40,15 @@ const useTabSecurity = () => {
       emitDebounced({
         source: "SYSTEM",
         type: "WINDOW_FOCUS",
-        state: "BLURRED",
+        state: "BLURRED"
+      });
+    };
+
+    const handleFocus = () => {
+      emitDebounced({
+        source: "SYSTEM",
+        type: "WINDOW_FOCUS",
+        state: "FOCUSED"
       });
     };
 
@@ -45,23 +57,23 @@ const useTabSecurity = () => {
         emitDebounced({
           source: "SYSTEM",
           type: "FULLSCREEN",
-          state: "EXITED",
+          state: "EXITED"
         });
       }
     };
 
     document.addEventListener("visibilitychange", handleVisibilityChange);
     window.addEventListener("blur", handleBlur);
+    window.addEventListener("focus", handleFocus);
     document.addEventListener("fullscreenchange", handleFullscreenChange);
 
     return () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       window.removeEventListener("blur", handleBlur);
+      window.removeEventListener("focus", handleFocus);
       document.removeEventListener("fullscreenchange", handleFullscreenChange);
     };
-
-  }, []);
-
+  }, [sessionId, enabled]);
 };
 
 export default useTabSecurity;

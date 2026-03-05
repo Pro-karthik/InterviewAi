@@ -1,39 +1,46 @@
 import { useRef } from "react";
 import { useLiveInterview } from "../context/LiveInterviewContext";
 
-import useTabSecurity from "../../../../hooks/useTabSecurity";
-import useFaceMonitoring from "../../../../hooks/useFaceMonitoring";
-import useHeartbeat from "../../../../hooks/useHeartbeat";
+import useProctoringEngine from "../../../../hooks/useProctoringEngine";
 
 const InterviewLayout = () => {
+  const { session } = useLiveInterview();
 
   const videoRef = useRef(null);
 
-  const { session } = useLiveInterview();
-
-  useTabSecurity();
-  useFaceMonitoring(videoRef);
-  useHeartbeat(session.id);
+  const { isReady, isLoading } = useProctoringEngine(videoRef, session.id);
 
   return (
-    <div className="h-screen grid grid-cols-2">
-
-      {/* Camera */}
-      <div className="bg-black flex items-center justify-center">
+    <div className="grid grid-cols-2 h-screen">
+      
+      {/* Camera panel */}
+      <div className="bg-black relative">
         <video
           ref={videoRef}
           autoPlay
           muted
           playsInline
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover scale-x-[-1]"
         />
+
+        {/* Loading overlay */}
+        {isLoading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/70 text-white">
+            Preparing proctoring system...
+          </div>
+        )}
+
+        {!isLoading && !isReady && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/70 text-red-400">
+            Monitoring initialization failed
+          </div>
+        )}
       </div>
 
-      {/* Question panel */}
+      {/* Interview panel */}
       <div className="p-6">
-        Interview running...
+        {isReady ? "Interview Running" : "Initializing Interview..."}
       </div>
-
     </div>
   );
 };
