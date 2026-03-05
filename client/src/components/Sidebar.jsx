@@ -113,7 +113,7 @@ function Sidebar({ isOpen, setIsOpen }) {
     >
       {/* HEADER */}
       <div className="flex items-center justify-between px-4 py-5">
-        <img src={logo} alt="logo" className="w-28 object-contain" />
+        <img src={logo} alt="logo" className="w-8 object-contain" />
 
         {expanded && (
           <button
@@ -130,7 +130,7 @@ function Sidebar({ isOpen, setIsOpen }) {
 
       {/* START BUTTON */}
       <div className="px-3">
-        <button
+        <Link to="/interview/start"
           onClick={(e) => e.stopPropagation()}
           className={`w-full flex items-center
             ${expanded ? "justify-center gap-2" : "justify-center"}
@@ -139,7 +139,7 @@ function Sidebar({ isOpen, setIsOpen }) {
         >
           <GoPlus size={20} />
           {expanded && <span>Start Interview</span>}
-        </button>
+        </Link>
       </div>
 
       {/* NAVIGATION */}
