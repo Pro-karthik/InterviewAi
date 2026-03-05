@@ -6,25 +6,36 @@ export const InterviewProvider = ({ children }) => {
   const [skills, setSkills] = useState([]);
   const [experience, setExperience] = useState(null);
   const [sessionId, setSessionId] = useState(null);
+  const [initialized, setInitialized] = useState(false);
 
   // Restore state on refresh
   useEffect(() => {
-    const stored = localStorage.getItem("interview_state");
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      setSkills(parsed.skills);
-      setExperience(parsed.experience);
-      setSessionId(parsed.sessionId);
+    if (typeof window !== "undefined") {
+      try {
+        const stored = localStorage.getItem("interview_state");
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          console.log("Restoring state from localStorage:", parsed);
+          setSkills(parsed.skills || []);
+          setExperience(parsed.experience || null);
+          setSessionId(parsed.sessionId || null);
+        }
+      } catch (err) {
+        console.error("Failed to parse interview_state:", err);
+      }
+      setInitialized(true);
     }
   }, []);
 
-  // Persist state
+  // Persist state only after initialization
   useEffect(() => {
-    localStorage.setItem(
-      "interview_state",
-      JSON.stringify({ skills, experience, sessionId })
-    );
-  }, [skills, experience, sessionId]);
+    if (initialized) {
+      localStorage.setItem(
+        "interview_state",
+        JSON.stringify({ skills, experience, sessionId })
+      );
+    }
+  }, [skills, experience, sessionId, initialized]);
 
   return (
     <InterviewContext.Provider
