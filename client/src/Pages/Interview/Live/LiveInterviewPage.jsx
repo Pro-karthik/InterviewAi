@@ -1,31 +1,11 @@
-import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { getSession } from "../../../api/session.api";
+import { LiveInterviewProvider } from "./context/LiveInterviewContext";
 import ReadyScreen from "./components/ReadyScreen";
+import { useLiveInterview } from "./context/LiveInterviewContext";
+import InterviewLayout from "./components/InterviewLayout";
 
-const LiveInterviewPage = () => {
-  const { id } = useParams();
-
-  const [loading, setLoading] = useState(true);
-  const [session, setSession] = useState(null);
-  const [questions, setQuestions] = useState([]);
-
-  useEffect(() => {
-    const loadSession = async () => {
-      try {
-        const data = await getSession(id);
-
-        setSession(data.session);
-        setQuestions(data.qaData);
-      } catch (error) {
-        console.error("Failed to fetch session", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadSession();
-  }, [id]);
+const InterviewContent = () => {
+  const { session, questions, loading, status } = useLiveInterview();
 
   if (loading) {
     return (
@@ -43,7 +23,7 @@ const LiveInterviewPage = () => {
     );
   }
 
-  if (session.status === "READY") {
+  if (status === "READY") {
     return (
       <ReadyScreen
         sessionId={session.id}
@@ -53,10 +33,24 @@ const LiveInterviewPage = () => {
     );
   }
 
+  if (status === "IN_PROGRESS") {
+  return <InterviewLayout />;
+}
+
   return (
     <div className="h-screen flex items-center justify-center">
-      Interview already started or finished
+      Interview in progress
     </div>
+  );
+};
+
+const LiveInterviewPage = () => {
+  const { id } = useParams();
+
+  return (
+    <LiveInterviewProvider sessionId={id}>
+      <InterviewContent />
+    </LiveInterviewProvider>
   );
 };
 
