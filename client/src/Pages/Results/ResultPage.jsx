@@ -1,8 +1,12 @@
-import ScoreCard from "./components/ScoreCard";
-import FeedbackSummary from "./components/FeedbackSummary";
-import ImprovementPlan from "./components/ImprovementPlan";
+import React from "react";
+import ResultSummaryCard from "./components/ResultSummaryCard";
+import StrengthSection from "./components/StrengthSection";
+import WeaknessSection from "./components/WeaknessSection";
+import ImprovementSection from "./components/ImprovementSection";
 import QuestionBreakdown from "./components/QuestionBreakdown";
 import ActionButtons from "./components/ActionButtons";
+
+
 
 const dummyData = {
   evaluation: {
@@ -52,44 +56,46 @@ const dummyData = {
   }
 };
 
-const ResultsPage = () => {
+const ResultPage = () => {
 
-  const evaluation = dummyData.evaluation;
+  const evaluation = dummyData?.evaluation;
+
+  if (!evaluation) {
+    return (
+      <div className="p-10 text-gray-500">
+        No evaluation data available
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-purple-50 px-12 py-10">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-purple-50 px-12 py-8">
 
-      {/* Header */}
+      <div className="max-w-7xl mx-auto space-y-8">
 
-      <div className="mb-10">
-        <h1 className="text-4xl font-semibold text-gray-900">
-          Interview Report
-        </h1>
+        {/* Top Summary */}
+        <ResultSummaryCard evaluation={evaluation} />
 
-        <p className="text-gray-500 mt-2">
-          A detailed AI evaluation of your interview performance
-        </p>
+        {/* Strengths + Weakness */}
+        <div className="grid grid-cols-2 gap-8">
+
+          <StrengthSection strengths={evaluation.strengths} />
+
+          <WeaknessSection weaknesses={evaluation.weaknesses} />
+
+        </div>
+
+        {/* Improvement */}
+        <ImprovementSection plan={evaluation.improvement_plan} />
+
+        {/* Question Breakdown */}
+        <QuestionBreakdown answers={evaluation.answers} />
+        {/* Action Buttons */}
+        <ActionButtons />
       </div>
-
-      <ScoreCard score={evaluation.overall_score} />
-
-      <div className="grid grid-cols-2 gap-8 mt-10">
-
-        <FeedbackSummary
-          strengths={evaluation.strengths}
-          weaknesses={evaluation.weaknesses}
-        />
-
-        <ImprovementPlan plan={evaluation.improvement_plan} />
-
-      </div>
-
-      <QuestionBreakdown answers={evaluation.answers} />
-
-      <ActionButtons />
 
     </div>
   );
 };
 
-export default ResultsPage;
+export default ResultPage;
