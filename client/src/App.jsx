@@ -22,7 +22,7 @@ import Settings from "./Pages/Settings/Settings"
 import ResultsPage from "./Pages/Results/ResultsPage";
 
 import LiveInterviewPage from "./Pages/Interview/Live/LiveInterviewPage";
-import Settings from "./Pages/Settings/Settings";
+
 function App() {
   return (
     <BrowserRouter>
@@ -49,7 +49,7 @@ function App() {
             <Route path="live/:id" element={<LiveInterviewPage />} />
             <Route path="evaluating" element={<EvaluatingPage />} />
             <Route path="terminated" element={<TerminatedPage />} />
-            <Route path="/results" element={<ResultsPage />} />  
+            <Route path="results" element={<ResultsPage />} />  
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
