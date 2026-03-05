@@ -51,7 +51,7 @@ export async function startInterviewService(userId, skill, experience) {
     await client.query("COMMIT");
 
     return {
-      session_id: session.id,
+      sessionId: session.id,
       message: "Interview prepared successfully"
     };
 
