@@ -19,7 +19,7 @@ import SetupPage from "./Pages/Interview/Setup/SetupPage";
 import TerminatedPage from "./Pages/Interview/Terminated/TerminatedPage";
 import EvaluatingPage from "./Pages/Interview/Evaluating/EvaluatingPage";
 import Settings from "./Pages/Settings/Settings"
-import ResultsPage from "./Pages/Results/ResultsPage";
+import ResultPage from "./Pages/Results/ResultPage";
 
 import LiveInterviewPage from "./Pages/Interview/Live/LiveInterviewPage";
 
@@ -49,7 +49,7 @@ function App() {
             <Route path="live/:id" element={<LiveInterviewPage />} />
             <Route path="evaluating" element={<EvaluatingPage />} />
             <Route path="terminated" element={<TerminatedPage />} />
-            <Route path="results" element={<ResultsPage />} />  
+            <Route path="results" element={<ResultPage />} />  
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
