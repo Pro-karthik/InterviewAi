@@ -3,7 +3,7 @@ import { createContext, useContext, useState, useEffect } from "react";
 const InterviewContext = createContext();
 
 export const InterviewProvider = ({ children }) => {
-  const [skill, setSkill] = useState(null);
+  const [skills, setSkills] = useState([]);
   const [experience, setExperience] = useState(null);
   const [sessionId, setSessionId] = useState(null);
 
@@ -12,7 +12,7 @@ export const InterviewProvider = ({ children }) => {
     const stored = localStorage.getItem("interview_state");
     if (stored) {
       const parsed = JSON.parse(stored);
-      setSkill(parsed.skill);
+      setSkills(parsed.skills);
       setExperience(parsed.experience);
       setSessionId(parsed.sessionId);
     }
@@ -22,17 +22,17 @@ export const InterviewProvider = ({ children }) => {
   useEffect(() => {
     localStorage.setItem(
       "interview_state",
-      JSON.stringify({ skill, experience, sessionId })
+      JSON.stringify({ skills, experience, sessionId })
     );
-  }, [skill, experience, sessionId]);
+  }, [skills, experience, sessionId]);
 
   return (
     <InterviewContext.Provider
       value={{
-        skill,
+        skills,
         experience,
         sessionId,
-        setSkill,
+        setSkills,
         setExperience,
         setSessionId,
       }}

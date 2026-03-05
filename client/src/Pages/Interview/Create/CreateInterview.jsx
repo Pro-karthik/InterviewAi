@@ -17,19 +17,10 @@ const CreateInterview = () => {
         skills,
         experience_level: experience,
       };
-      // const builtInSkills = ["React", "Node.js", "Python", "Java", "System Design", "DevOps", "MongoDB"];
-      // const skillcheck = skills.every((skill) =>
-      //   builtInSkills.includes(skill)
-      // );
-
-      // if (!skillcheck) {
-      //   await createSession(payload);
-      // }
+     
+    
       await validateSkills(payload);
-
-      navigate("/interview/setup/instructions", {
-        state: payload,
-      });
+      navigate("/interview/setup/instructions");
 
     } catch (error) {
       console.error(error);
