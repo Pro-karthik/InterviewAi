@@ -4,6 +4,7 @@ import { useAuth } from "../../../context/AuthContext";
 
 function ProtectedRoute({ children }) {
   const { accessToken, loading } = useAuth();
+  console.log("ProtectedRoute - accessToken:", accessToken, "loading:", loading);
 
   // wait for auth initialization
   if (loading) {

@@ -1,18 +1,37 @@
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useLiveInterview } from "../context/LiveInterviewContext";
 
 import useProctoringEngine from "../../../../hooks/useProctoringEngine";
 
 const InterviewLayout = () => {
+
   const { session } = useLiveInterview();
+  const sessionId = session?.id;
 
   const videoRef = useRef(null);
+  const navigate = useNavigate();
 
-  const { isReady, isLoading } = useProctoringEngine(videoRef, session.id);
+  const { isReady, isLoading } =
+    useProctoringEngine(videoRef, sessionId);
+
+  useEffect(() => {
+
+    const handler = () => {
+      navigate("/interview/terminated");
+    };
+
+    window.addEventListener("INTERVIEW_TERMINATED", handler);
+
+    return () => {
+      window.removeEventListener("INTERVIEW_TERMINATED", handler);
+    };
+
+  }, [navigate]);
 
   return (
     <div className="grid grid-cols-2 h-screen">
-      
+
       {/* Camera panel */}
       <div className="bg-black relative">
         <video
@@ -41,6 +60,7 @@ const InterviewLayout = () => {
       <div className="p-6">
         {isReady ? "Interview Running" : "Initializing Interview..."}
       </div>
+
     </div>
   );
 };
