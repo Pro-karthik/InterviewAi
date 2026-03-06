@@ -19,6 +19,8 @@ const useFaceMonitoring = (videoRef, sessionId, enabled = true) => {
 
   const [isReady, setIsReady] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [cameraStatus, setCameraStatus] = useState("OK");
+const [statusMessage, setStatusMessage] = useState("");
 
   // 🔹 Helper: enrich with timestamp
   const emitWithContext = (event) => {
@@ -39,7 +41,6 @@ const useFaceMonitoring = (videoRef, sessionId, enabled = true) => {
       gracePeriod: 500,
     }),
   ).current;
-
 
   const multiFaceTracker = useRef(
     createBehaviorTracker({
@@ -163,6 +164,8 @@ const useFaceMonitoring = (videoRef, sessionId, enabled = true) => {
                   source: "FACE",
                   type: "NO_FACE",
                 });
+                setCameraStatus("NO_FACE");
+  setStatusMessage("No face detected");
               }
 
               // 2️⃣ Multiple Faces
@@ -181,6 +184,9 @@ const useFaceMonitoring = (videoRef, sessionId, enabled = true) => {
                   type: "MULTIPLE_FACES",
                   duration: multiFaceViolation.duration,
                 });
+                setCameraStatus("MULTIPLE_FACES");
+  setStatusMessage("Multiple faces detected");
+
               }
 
               // 3️⃣ Face analysis
@@ -195,6 +201,9 @@ const useFaceMonitoring = (videoRef, sessionId, enabled = true) => {
                     type: "HEAD_YAW",
                     duration: yawResult.duration,
                   });
+                  setCameraStatus("LOOK_AWAY");
+  setStatusMessage("Please look at the screen");
+
                 }
 
                 const pitchResult = pitchTracker(rules.includes("HEAD_PITCH"));
@@ -204,7 +213,19 @@ const useFaceMonitoring = (videoRef, sessionId, enabled = true) => {
                     type: "HEAD_PITCH",
                     duration: pitchResult.duration,
                   });
+                   setCameraStatus("LOOK_DOWN");
+  setStatusMessage("Please raise your head");
+
                 }
+               if (
+  faces.length === 1 &&
+  validFaces.length === 1 &&
+  !rules.includes("HEAD_YAW") &&
+  !rules.includes("HEAD_PITCH")
+) {
+  setCameraStatus("OK");
+  setStatusMessage("Face centered");
+}
               }
             } catch (err) {
               console.error("Detection Error:", err);
@@ -244,6 +265,8 @@ const useFaceMonitoring = (videoRef, sessionId, enabled = true) => {
   return {
     isReady,
     isLoading,
+      cameraStatus,
+  statusMessage
   };
 };
 

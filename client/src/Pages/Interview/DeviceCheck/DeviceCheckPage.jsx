@@ -15,7 +15,8 @@ const steps = [
 ];
 
 const DeviceCheckPage = () => {
-  const { skills, experience, setSessionId } = useInterview();
+  const { skills, experience, setSessionId, setSkills, setExperience } =
+    useInterview();
   const navigate = useNavigate();
   const { stream, error } = useCameraStream();
   const [step, setStep] = useState(1);
@@ -30,6 +31,9 @@ const DeviceCheckPage = () => {
       const sessionId = response?.data?.sessionId;
 
       if (sessionId) {
+        setSkills([]);
+        setExperience(null);
+        localStorage.removeItem("interview_state");
         setSessionId(sessionId);
         navigate(`/interview/live/${sessionId}`);
       } else {
@@ -54,8 +58,8 @@ const DeviceCheckPage = () => {
             Permission Required
           </h2>
           <p className="text-sm text-gray-500">
-            Camera or microphone access was denied. Please allow permissions
-            and refresh the page to continue.
+            Camera or microphone access was denied. Please allow permissions and
+            refresh the page to continue.
           </p>
         </div>
       </div>

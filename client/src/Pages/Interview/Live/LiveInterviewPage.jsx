@@ -1,28 +1,41 @@
 import { useParams } from "react-router-dom";
-import { LiveInterviewProvider } from "./context/LiveInterviewContext";
+import { LiveInterviewProvider, useLiveInterview } from "./context/LiveInterviewContext";
 import ReadyScreen from "./components/ReadyScreen";
-import { useLiveInterview } from "./context/LiveInterviewContext";
+import NoInterviewLayout from "./components/NoInterviewLayout";
 import InterviewLayout from "./components/InterviewLayout";
+import TerminatedPage from "../Terminated/TerminatedPage";
+import { HashLoader } from "react-spinners";
 
 const InterviewContent = () => {
   const { session, questions, loading, status } = useLiveInterview();
 
+  /*
+  ============================
+  Loading State
+  ============================
+  */
   if (loading) {
     return (
-      <div className="h-screen flex items-center justify-center">
-        Loading interview...
+      <div className="h-screen flex items-center justify-center bg-[#f8fafc]">
+        <HashLoader color="#5B2C6F" size={60} />
       </div>
     );
   }
 
+  /*
+  ============================
+  No Session
+  ============================
+  */
   if (!session) {
-    return (
-      <div className="h-screen flex items-center justify-center">
-        Session not found
-      </div>
-    );
+    return <NoInterviewLayout />;
   }
 
+  /*
+  ============================
+  Ready State
+  ============================
+  */
   if (status === "READY") {
     return (
       <ReadyScreen
@@ -33,15 +46,40 @@ const InterviewContent = () => {
     );
   }
 
+  /*
+  ============================
+  Interview Running
+  ============================
+  */
   if (status === "IN_PROGRESS") {
-  return <InterviewLayout />;
-}
+    return <InterviewLayout />;
+  }
 
-  return (
-    <div className="h-screen flex items-center justify-center">
-      Interview in progress
-    </div>
-  );
+  /*
+  ============================
+  Finished State
+  ============================
+  */
+  if (status === "FINISHED") {
+    return (
+      <div className="h-screen flex items-center justify-center bg-[#f8fafc] text-gray-700 text-lg font-medium">
+        Interview completed successfully
+      </div>
+    );
+  }
+
+  /*
+  ============================
+  Terminated / Timeout
+  ============================
+  */
+  if (status === "TERMINATED") {
+    return (
+      <TerminatedPage/>
+    );
+  }
+
+  return null;
 };
 
 const LiveInterviewPage = () => {

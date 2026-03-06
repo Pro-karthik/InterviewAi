@@ -1,6 +1,7 @@
 import { sentViolation } from "../api/proctoring.api";
 
 export const emitMetric = async (sessionId, metric) => {
+  console.log(metric)
   try {
 
     const res = await sentViolation(sessionId, metric);
