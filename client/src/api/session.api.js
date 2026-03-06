@@ -1,3 +1,4 @@
+import { data } from "react-router-dom";
 import axios from "./axios";
 
 // Create Interview Session
@@ -19,3 +20,9 @@ export const beginSession = (sessionId) =>
  
 export const heartbeat = (sessionId) =>
   axios.post(`/proctoring/session/${sessionId}/heartbeat`);
+
+export const submitSession = (sessionId,data) => 
+  axios.post(`/session/${sessionId}/submit`,data)
+
+export const evaluateSession = (sessionId) => 
+  axios.post(`/session/${sessionId}/evaluate`)

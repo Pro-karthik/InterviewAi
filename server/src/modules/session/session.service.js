@@ -79,30 +79,53 @@ export async function beginInterviewService(sessionId, userId) {
       throw new Error("Unauthorized");
     }
 
-    if (session.status !== "READY") {
-      throw new Error("Interview already started or invalid state");
+    // If interview already finished
+    if (session.status === "COMPLETED" || session.status === "TERMINATED") {
+      return {
+        status: session.status,
+        message: "Interview already finished"
+      };
     }
 
-    // Interview duration (15 minutes)
-    const durationSeconds = 900;
+    // CASE 1: First time start
+    if (session.status === "READY") {
+      const durationSeconds = 900;
 
-    await queries.startInterviewTimer(
-      client,
-      sessionId,
-      durationSeconds
-    );
+      await queries.startInterviewTimer(
+        client,
+        sessionId,
+        durationSeconds
+      );
 
-    await queries.updateSessionStatus(
-      client,
-      sessionId,
-      "IN_PROGRESS"
-    );
+      await queries.updateSessionStatus(
+        client,
+        sessionId,
+        "IN_PROGRESS"
+      );
 
-    await client.query("COMMIT");
+      await client.query("COMMIT");
 
-    return {
-      message: "Interview started successfully"
-    };
+      return {
+        status: "IN_PROGRESS",
+        message: "Interview started",
+        startTime: new Date(),
+        serverTime: new Date(),
+        durationSeconds
+      };
+    }
+
+    // CASE 2: Refresh / Resume
+    if (session.status === "IN_PROGRESS") {
+      await client.query("COMMIT");
+
+      return {
+        status: "IN_PROGRESS",
+        message: "Interview resumed",
+        startTime: session.started_at,
+        durationSeconds: session.duration_seconds,
+        serverTime: new Date()
+      };
+    }
 
   } catch (error) {
     await client.query("ROLLBACK");
@@ -325,10 +348,12 @@ export async function getSessionService(sessionId, userId) {
     }
 
     const qaData = await queries.getFullSessionData(client, sessionId);
+    const serverTime = new Date()
 
     return {
       session,
-      qaData
+      qaData,
+      serverTime
     };
 
   } finally {

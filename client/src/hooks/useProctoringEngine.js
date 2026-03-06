@@ -9,14 +9,14 @@ const useProctoringEngine = (videoRef, sessionId) => {
   const [error, setError] = useState(null);
 
   // Face monitoring (camera + model)
-  const { isReady: faceReady, isLoading } = useFaceMonitoring(
+  const { isReady: faceReady, isLoading,cameraStatus,statusMessage } = useFaceMonitoring(
     videoRef,
     sessionId,
     true
   );
 
   // Enable tab security only when monitoring is active
-  useTabSecurity(sessionId, faceReady);
+  useTabSecurity(sessionId, false);
 
   // Heartbeat only when monitoring is active
   useHeartbeat(sessionId, faceReady);
@@ -43,6 +43,8 @@ const useProctoringEngine = (videoRef, sessionId) => {
     isReady: state === "MONITORING_ACTIVE",
     isLoading,
     error,
+    cameraStatus,
+    statusMessage
   };
 };
 
