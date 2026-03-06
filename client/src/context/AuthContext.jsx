@@ -33,7 +33,7 @@ export const AuthProvider = ({ children }) => {
 
         if (!isMounted) return;
 
-        setAccessToken(newAccessToken);
+        setAccessTokenState(newAccessToken);
 
         const profileRes = await getProfile();
 
