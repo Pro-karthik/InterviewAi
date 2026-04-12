@@ -102,16 +102,20 @@ export async function startInterviewTimer(client, sessionId, durationSeconds) {
     `
     UPDATE interview_sessions
     SET 
-      started_at = NOW(),
-      expires_at = NOW() + ($2 * INTERVAL '1 second'),
+      started_at =clock_timestamp(),
+      expires_at = clock_timestamp() + ($2 * INTERVAL '1 second'),
       duration_seconds = $2,
-      updated_at = NOW()
+      updated_at = clock_timestamp()
     WHERE id = $1
     `,
     [sessionId, durationSeconds]
   );
 }
 
+export async function getDbTime(client) {
+  const res = await client.query(`SELECT clock_timestamp() AS now`);
+  return res.rows[0].now;
+}
 export async function insertSessionAnalysis(
   client,
   sessionId,
