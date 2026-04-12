@@ -8,7 +8,7 @@ import { HashLoader } from "react-spinners";
 
 const InterviewContent = () => {
   const { session, questions, loading, status } = useLiveInterview();
-
+  console.log("InterviewContent Rendered with status:", status, "and session:", session);
   /*
   ============================
   Loading State

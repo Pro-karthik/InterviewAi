@@ -89,47 +89,136 @@ export async function beginInterviewService(sessionId, userId) {
 
     // CASE 1: First time start
     if (session.status === "READY") {
-      const durationSeconds = 900;
+  const durationSeconds = 900;
 
-      await queries.startInterviewTimer(
-        client,
-        sessionId,
-        durationSeconds
-      );
+  await queries.startInterviewTimer(
+    client,
+    sessionId,
+    durationSeconds
+  );
 
-      await queries.updateSessionStatus(
-        client,
-        sessionId,
-        "IN_PROGRESS"
-      );
+  await queries.updateSessionStatus(
+    client,
+    sessionId,
+    "IN_PROGRESS"
+  );
 
-      await client.query("COMMIT");
+  // ✅ fetch DB time + updated session
+  const updatedSession = await queries.getSessionById(client, sessionId);
+  const serverTime = await queries.getDbTime(client);
 
-      return {
-        status: "IN_PROGRESS",
-        message: "Interview started",
-        startTime: new Date(),
-        serverTime: new Date(),
-        durationSeconds
-      };
-    }
+  await client.query("COMMIT");
+
+  return {
+    status: "IN_PROGRESS",
+    message: "Interview started",
+
+    startTime: updatedSession.started_at,
+    expiresAt: updatedSession.expires_at,
+    durationSeconds: updatedSession.duration_seconds,
+
+    serverTime,
+    remainingSeconds: Math.max(
+      0,
+      Math.floor((new Date(updatedSession.expires_at) - new Date(serverTime)) / 1000)
+    )
+  };
+}
 
     // CASE 2: Refresh / Resume
-    if (session.status === "IN_PROGRESS") {
-      await client.query("COMMIT");
+   if (session.status === "IN_PROGRESS") {
 
-      return {
-        status: "IN_PROGRESS",
-        message: "Interview resumed",
-        startTime: session.started_at,
-        durationSeconds: session.duration_seconds,
-        serverTime: new Date()
-      };
-    }
+  const serverTime = await queries.getDbTime(client);
+
+  // ✅ expiry validation (CRITICAL FIX)
+  if (new Date(serverTime) >= new Date(session.expires_at)) {
+    await queries.updateSessionStatus(client, sessionId, "COMPLETED");
+
+    await client.query("COMMIT");
+
+    return {
+      status: "COMPLETED",
+      message: "Interview time expired",
+
+      startTime: session.started_at,
+      expiresAt: session.expires_at,
+      durationSeconds: session.duration_seconds,
+
+      serverTime,
+      remainingSeconds: 0
+    };
+  }
+
+  await client.query("COMMIT");
+
+  return {
+    status: "IN_PROGRESS",
+    message: "Interview resumed",
+
+    startTime: session.started_at,
+    expiresAt: session.expires_at,
+    durationSeconds: session.duration_seconds,
+
+    serverTime,
+    remainingSeconds: Math.max(
+      0,
+      Math.floor((new Date(session.expires_at) - new Date(serverTime)) / 1000)
+    )
+  };
+}
 
   } catch (error) {
     await client.query("ROLLBACK");
     throw error;
+  } finally {
+    client.release();
+  }
+}
+
+export async function getSessionService(sessionId, userId) {
+  const client = await pool.connect();
+
+  try {
+    const session = await queries.getSessionById(client, sessionId);
+
+    if (!session) {
+      throw new Error("Session not found");
+    }
+
+    if (session.user_id !== userId) {
+      throw new Error("Unauthorized");
+    }
+
+    const qaData = await queries.getFullSessionData(client, sessionId);
+    console.log("Full session data fetched:", { session });
+    // ✅ DB time
+    const serverTime = await queries.getDbTime(client);
+    console.log("Server time fetched:", serverTime, "Session expires at:", session.expires_at);
+    let remainingSeconds = null;
+    
+    if (session.expires_at) {
+      remainingSeconds = Math.max(
+        0,
+        Math.floor((new Date(session.expires_at) - new Date(serverTime)) / 1000)
+      );
+    }
+    console.log("Calculated remainingSeconds:", remainingSeconds);
+    return {
+      session,
+      qaData,
+
+      // ✅ consistent timer block
+      timer: session.started_at
+        ? {
+            startTime: session.started_at,
+            expiresAt: session.expires_at,
+            durationSeconds: session.duration_seconds,
+            serverTime,
+            remainingSeconds
+          }
+        : null
+    };
+
   } finally {
     client.release();
   }
@@ -327,35 +416,6 @@ export async function evaluateSessionService(sessionId, userId) {
   } catch (error) {
     await client.query("ROLLBACK");
     throw error;
-  } finally {
-    client.release();
-  }
-}
-
-
-export async function getSessionService(sessionId, userId) {
-  const client = await pool.connect();
-
-  try {
-    const session = await queries.getSessionById(client, sessionId);
-
-    if (!session) {
-      throw new Error("Session not found");
-    }
-
-    if (session.user_id !== userId) {
-      throw new Error("Unauthorized");
-    }
-
-    const qaData = await queries.getFullSessionData(client, sessionId);
-    const serverTime = new Date()
-
-    return {
-      session,
-      qaData,
-      serverTime
-    };
-
   } finally {
     client.release();
   }

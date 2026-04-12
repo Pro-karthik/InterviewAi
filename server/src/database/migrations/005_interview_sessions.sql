@@ -12,9 +12,10 @@ CREATE TABLE interview_sessions (
 
   duration_seconds INTEGER DEFAULT 900,
 
-  started_at TIMESTAMP NULL,
-  expires_at TIMESTAMP NULL,
-  ended_at TIMESTAMP NULL,
+  -- ✅ FIXED (timezone safe)
+  started_at TIMESTAMPTZ NULL,
+  expires_at TIMESTAMPTZ NULL,
+  ended_at TIMESTAMPTZ NULL,
 
   total_questions INTEGER,
   answered_questions INTEGER DEFAULT 0,
@@ -23,10 +24,11 @@ CREATE TABLE interview_sessions (
   risk_score NUMERIC,
   risk_level risk_level_enum,
 
-  terminated_at TIMESTAMP NULL,
+  terminated_at TIMESTAMPTZ NULL,
   termination_reason TEXT NULL,
   terminated_by_system BOOLEAN DEFAULT FALSE,
 
-  created_at TIMESTAMP DEFAULT NOW(),
-  updated_at TIMESTAMP DEFAULT NOW()
+  -- ✅ FIXED
+  created_at TIMESTAMPTZ DEFAULT clock_timestamp(),
+  updated_at TIMESTAMPTZ DEFAULT clock_timestamp()
 );

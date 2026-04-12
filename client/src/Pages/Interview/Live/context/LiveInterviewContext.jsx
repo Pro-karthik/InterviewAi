@@ -14,26 +14,7 @@ export const LiveInterviewProvider = ({ sessionId, children }) => {
   const [error, setError] = useState(null);
 
   const [status, setStatus] = useState("READY");
-  const [timeRemaining, setTimeRemaining] = useState(0);
-
-  /*
-  ============================
-  Helper: Calculate remaining time
-  ============================
-  */
-  const calculateRemainingTime = (
-    startTime,
-    durationSeconds,
-    serverTime
-  ) => {
-    console.log(startTime,serverTime)
-    const start = new Date(startTime).getTime();
-    const serverNow = new Date(serverTime).getTime();
-
-    const elapsed = Math.floor((serverNow - start) / 1000);
-    console.log(elapsed)
-    return Math.max(durationSeconds - elapsed, 0);
-  };
+  const [timeRemaining, setTimeRemaining] = useState(null);
 
   /*
   ============================
@@ -44,23 +25,18 @@ export const LiveInterviewProvider = ({ sessionId, children }) => {
     const loadSession = async () => {
       try {
         const response = await getSession(sessionId);
+        console.log("Session data loaded:", response.data);
+        // ✅ NEW BACKEND CONTRACT
+        const { session: sessionData, qaData, timer } = response.data;
 
-        const { session: sessionData, qaData, serverTime } = response.data;
         setSession(sessionData);
         setQuestions(qaData);
         setStatus(sessionData.status);
 
-        /*
-        Restore timer if already started
-        */
-        if (sessionData.status === "IN_PROGRESS") {
-          const remaining = calculateRemainingTime(
-            sessionData.started_at,
-            sessionData.duration_Seconds,
-            serverTime
-          );
-
-          setTimeRemaining(remaining);
+        // ✅ TRUST BACKEND TIMER ONLY
+        if (timer) {
+          console.log(timer.remainingSeconds)
+          setTimeRemaining(timer.remainingSeconds);
         }
 
       } catch (err) {
@@ -89,16 +65,16 @@ export const LiveInterviewProvider = ({ sessionId, children }) => {
 
       const response = await beginSession(sessionId);
 
-      const { startTime, durationSeconds, serverTime } = response.data;
+      // ✅ NEW BACKEND RESPONSE
+      const {
+        remainingSeconds,
+        status: newStatus
+      } = response.data;
 
-      const remaining = calculateRemainingTime(
-        startTime,
-        durationSeconds,
-        serverTime
-      );
-
-      setTimeRemaining(remaining);
-      setStatus("IN_PROGRESS");
+      // ✅ DIRECTLY USE BACKEND VALUE
+      console.log("Interview started with remainingSeconds:", remainingSeconds, "and status:", newStatus);
+      setTimeRemaining(remainingSeconds);
+      setStatus(newStatus || "IN_PROGRESS");
       setCurrentQuestionIndex(0);
 
     } catch (error) {
@@ -108,7 +84,7 @@ export const LiveInterviewProvider = ({ sessionId, children }) => {
 
   /*
   ============================
-  Timer Logic
+  Timer Logic (SAFE COUNTDOWN)
   ============================
   */
   useEffect(() => {
@@ -117,6 +93,7 @@ export const LiveInterviewProvider = ({ sessionId, children }) => {
     const interval = setInterval(() => {
       setTimeRemaining((prev) => {
         if (prev <= 1) {
+          console.log("Time's up! Finishing interview.");
           clearInterval(interval);
           finishInterview();
           return 0;
@@ -126,7 +103,6 @@ export const LiveInterviewProvider = ({ sessionId, children }) => {
     }, 1000);
 
     return () => clearInterval(interval);
-
   }, [status]);
 
   /*
