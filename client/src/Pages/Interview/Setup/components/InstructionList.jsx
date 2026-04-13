@@ -11,7 +11,7 @@ const InstructionList = () => {
         </h3>
         <div className="flex items-center gap-2 text-sm text-purple-700">
           <FiClock />
-          <span><strong>Duration:</strong> 30 Minutes (Strictly Timed)</span>
+          <span><strong>Duration:</strong> 15 Minutes (Strictly Timed)</span>
         </div>
         <p className="text-sm text-purple-700 mt-2">
           You are required to answer all questions within the given time limit.

@@ -1,9 +1,17 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { getSession, beginSession } from "../../../../api/session.api";
+import {
+  getSession,
+  beginSession,
+  submitSession,
+  evaluateSession
+} from "../../../../api/session.api";
+import { useNavigate } from "react-router-dom";
 
 const LiveInterviewContext = createContext();
 
 export const LiveInterviewProvider = ({ sessionId, children }) => {
+  const navigate = useNavigate();
+
   const [session, setSession] = useState(null);
   const [questions, setQuestions] = useState([]);
 
@@ -16,40 +24,35 @@ export const LiveInterviewProvider = ({ sessionId, children }) => {
   const [status, setStatus] = useState("READY");
   const [timeRemaining, setTimeRemaining] = useState(null);
 
+  const [evaluating, setEvaluating] = useState(false);
+
   /*
   ============================
-  Load Interview Session
+  Load Session
   ============================
   */
   useEffect(() => {
     const loadSession = async () => {
       try {
         const response = await getSession(sessionId);
-        console.log("Session data loaded:", response.data);
-        // ✅ NEW BACKEND CONTRACT
         const { session: sessionData, qaData, timer } = response.data;
 
         setSession(sessionData);
         setQuestions(qaData);
         setStatus(sessionData.status);
 
-        // ✅ TRUST BACKEND TIMER ONLY
         if (timer) {
-          console.log(timer.remainingSeconds)
           setTimeRemaining(timer.remainingSeconds);
         }
-
       } catch (err) {
-        console.error("Failed to load interview session", err);
+        console.error(err);
         setError("Failed to load interview");
       } finally {
         setLoading(false);
       }
     };
 
-    if (sessionId) {
-      loadSession();
-    }
+    if (sessionId) loadSession();
   }, [sessionId]);
 
   /*
@@ -65,26 +68,19 @@ export const LiveInterviewProvider = ({ sessionId, children }) => {
 
       const response = await beginSession(sessionId);
 
-      // ✅ NEW BACKEND RESPONSE
-      const {
-        remainingSeconds,
-        status: newStatus
-      } = response.data;
+      const { remainingSeconds, status } = response.data;
 
-      // ✅ DIRECTLY USE BACKEND VALUE
-      console.log("Interview started with remainingSeconds:", remainingSeconds, "and status:", newStatus);
       setTimeRemaining(remainingSeconds);
-      setStatus(newStatus || "IN_PROGRESS");
+      setStatus(status || "IN_PROGRESS");
       setCurrentQuestionIndex(0);
-
     } catch (error) {
-      console.error("Failed to start interview", error);
+      console.error(error);
     }
   };
 
   /*
   ============================
-  Timer Logic (SAFE COUNTDOWN)
+  Timer
   ============================
   */
   useEffect(() => {
@@ -93,7 +89,6 @@ export const LiveInterviewProvider = ({ sessionId, children }) => {
     const interval = setInterval(() => {
       setTimeRemaining((prev) => {
         if (prev <= 1) {
-          console.log("Time's up! Finishing interview.");
           clearInterval(interval);
           finishInterview();
           return 0;
@@ -107,7 +102,7 @@ export const LiveInterviewProvider = ({ sessionId, children }) => {
 
   /*
   ============================
-  Answer Handling
+  Save Answer
   ============================
   */
   const saveAnswer = (index, text) => {
@@ -119,7 +114,7 @@ export const LiveInterviewProvider = ({ sessionId, children }) => {
 
   /*
   ============================
-  Question Navigation
+  Navigation
   ============================
   */
   const nextQuestion = () => {
@@ -140,15 +135,76 @@ export const LiveInterviewProvider = ({ sessionId, children }) => {
 
   /*
   ============================
-  Interview Finish
+  Submit + Evaluate (CORE)
   ============================
   */
-  const finishInterview = () => {
-    if (document.fullscreenElement) {
-      document.exitFullscreen();
-    }
+  const submitAndEvaluate = async () => {
+    try {
+      if (evaluating) return;
 
-    setStatus("FINISHED");
+      setEvaluating(true);
+
+      // 🔹 format answers safely
+      const formattedAnswers = Object.keys(answers)
+        .map((index) => {
+          const question = questions[index];
+          if (!question) return null;
+
+          return {
+            question_id: question.question_id,
+            answer_text: answers[index] || ""
+          };
+        })
+        .filter(Boolean);
+
+      // 🔹 Submit
+      await submitSession(sessionId, {
+        answers: formattedAnswers
+      });
+
+      console.log("✅ Answers submitted");
+
+      // 🔹 Redirect to loading page
+      navigate("/evaluating");
+
+      // 🔹 Evaluate
+      const evalResponse = await evaluateSession(sessionId);
+
+      const evaluationData = evalResponse.data.evaluation;
+
+      console.log("✅ Evaluation done");
+
+      // 🔹 Redirect to results
+      navigate("/results", {
+        state: { evaluation: evaluationData }
+      });
+
+    } catch (error) {
+      console.error("❌ Flow failed", error);
+      setError("Something went wrong");
+    } finally {
+      setEvaluating(false);
+    }
+  };
+
+  /*
+  ============================
+  Finish Interview
+  ============================
+  */
+  const finishInterview = async () => {
+    try {
+      if (document.fullscreenElement) {
+        await document.exitFullscreen();
+      }
+
+      setStatus("FINISHED");
+
+      await submitAndEvaluate(); // 🔥 full pipeline
+
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   /*
@@ -181,7 +237,8 @@ export const LiveInterviewProvider = ({ sessionId, children }) => {
         finishInterview,
 
         timeRemaining,
-        allAnswered
+        allAnswered,
+        evaluating
       }}
     >
       {children}

@@ -32,14 +32,14 @@ const TerminatedPage = ({ reason }) => {
         {/* Action Buttons */}
         <div className="flex justify-center gap-6">
           <button
-            onClick={() => navigate("/")}
+            onClick={() => navigate("/dashboard")}
             className="px-10 py-3 bg-gray-200 rounded-2xl hover:bg-gray-300 transition"
           >
             Go Home
           </button>
 
           <button
-            onClick={() => navigate("/create")}
+            onClick={() => navigate("/interview/start")}
             className="px-12 py-3 bg-gradient-to-r from-[#4D2C5E] to-[#6D3C82]
                        text-white rounded-2xl shadow-lg hover:scale-[1.02]
                        transition-all duration-200"
