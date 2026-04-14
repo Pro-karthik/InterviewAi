@@ -11,8 +11,7 @@ const StrengthSection = ({ strengths }) => {
 
       <p className="text-gray-600 leading-relaxed">
         {strengths || "—"}
-        Lorem ipsum dolor sit amet consectetur, adipisicing elit. Neque aliquam, reiciendis itaque earum eos voluptatibus reprehenderit unde non provident sint, cupiditate eligendi nobis molestiae, recusandae error id iusto eaque. Quasi quis laboriosam iure possimus dolorem vitae commodi? Ipsa perferendis libero vel eius at quaerat nam, ab veniam eveniet illo ut?
-      </p>
+       </p>
 
     </div>
   );
