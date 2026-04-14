@@ -11,8 +11,7 @@ const WeaknessSection = ({ weaknesses }) => {
 
       <p className="text-gray-600 leading-relaxed">
         {weaknesses || "—"}
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Beatae laborum, laudantium voluptatibus in tenetur obcaecati, nemo, mollitia eaque dignissimos iste perferendis minus blanditiis! Beatae praesentium voluptate sapiente excepturi impedit. Quaerat.
-      </p>
+       </p>
 
     </div>
   );

@@ -25,6 +25,7 @@ export const LiveInterviewProvider = ({ sessionId, children }) => {
   const [timeRemaining, setTimeRemaining] = useState(null);
 
   const [evaluating, setEvaluating] = useState(false);
+  const [evaluation, setEvaluation] = useState(null);
 
   /*
   ============================
@@ -165,17 +166,18 @@ export const LiveInterviewProvider = ({ sessionId, children }) => {
       console.log("✅ Answers submitted");
 
       // 🔹 Redirect to loading page
-      navigate("/evaluating");
+      navigate("/interview/evaluating");
 
       // 🔹 Evaluate
       const evalResponse = await evaluateSession(sessionId);
 
       const evaluationData = evalResponse.data.evaluation;
+      setEvaluation(evaluationData)
 
       console.log("✅ Evaluation done");
 
       // 🔹 Redirect to results
-      navigate("/results", {
+      navigate("/interview/results", {
         state: { evaluation: evaluationData }
       });
 

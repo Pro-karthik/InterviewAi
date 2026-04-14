@@ -48,7 +48,6 @@ const QuestionBreakdown = ({ answers = [] }) => {
               <p className="font-medium text-gray-900">
                 <strong>Question {index + 1}: &nbsp; </strong>
 
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Commodi tempore nam magnam nostrum voluptates laudantium fuga placeat ab provident sunt aliquam distinctio similique expedita incidunt, vitae accusantium, tempora nisi ipsam!z
               </p>
 
               <p className="text-sm font-semibold text-gray-900">
