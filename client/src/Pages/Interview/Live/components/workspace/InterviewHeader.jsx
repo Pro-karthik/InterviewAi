@@ -8,15 +8,15 @@ const InterviewHeader = () => {
   const current = currentQuestionIndex + 1;
 
   return (
-    <div className="flex items-center justify-between border-b pb-4 mb-6 mr-12">
+    <div className="mb-6 mr-12 flex items-center justify-between rounded-3xl border border-gray-100 bg-white/85 px-6 py-5 shadow-[0_20px_45px_-30px_rgba(77,44,94,0.35)] backdrop-blur-sm">
 
       {/* Left side */}
       <div>
-        <h1 className="text-xl font-semibold text-gray-800">
+        <h1 className="text-xl font-semibold tracking-tight text-gray-800">
           {session?.skill} Interview
         </h1>
 
-        <p className="text-sm text-gray-500">
+        <p className="mt-1 text-sm text-gray-500">
           Question {current} of {totalQuestions}
         </p>
       </div>
