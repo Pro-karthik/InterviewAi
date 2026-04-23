@@ -4,6 +4,12 @@ const QuestionMeta = () => {
   const { questions, currentQuestionIndex } = useLiveInterview();
 
   const question = questions[currentQuestionIndex];
+  const difficultyStyles =
+    question?.difficulty === "Easy"
+      ? "border border-green-200 bg-green-50 text-green-700"
+      : question?.difficulty === "Medium"
+      ? "border border-yellow-200 bg-yellow-50 text-yellow-700"
+      : "border border-red-200 bg-red-50 text-red-700";
 
   if (!question) return null;
 
@@ -11,21 +17,12 @@ const QuestionMeta = () => {
     <div className="flex items-center gap-3 mb-4">
 
       {/* Category Badge */}
-      <span className="px-3 py-1 text-sm rounded-full bg-blue-100 text-blue-700 font-medium">
+      <span className="rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-medium text-blue-700 shadow-sm">
         Category: {question.category}
       </span>
 
       {/* Difficulty Badge */}
-      <span
-        className={`px-3 py-1 text-sm rounded-full font-medium
-        ${
-          question.difficulty === "Easy"
-            ? "bg-green-100 text-green-700"
-            : question.difficulty === "Medium"
-            ? "bg-yellow-100 text-yellow-700"
-            : "bg-red-100 text-red-700"
-        }`}
-      >
+      <span className={`rounded-full px-4 py-2 text-sm font-medium shadow-sm ${difficultyStyles}`}>
         Difficulty: {question.difficulty}
       </span>
 

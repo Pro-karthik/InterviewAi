@@ -7,9 +7,9 @@ const QuestionCard = () => {
   if (!question) return null;
 
   return (
-    <div className="bg-white border rounded-lg p-5 mb-6 shadow-sm">
+    <div className="mb-6 rounded-3xl border border-gray-100 bg-white/90 p-6 shadow-[0_20px_45px_-30px_rgba(77,44,94,0.35)] backdrop-blur-sm">
 
-      <p className="text-gray-800 leading-relaxed whitespace-pre-line">
+      <p className="whitespace-pre-line text-[15px] leading-7 text-gray-800">
         {question.question_text}
       </p>
 

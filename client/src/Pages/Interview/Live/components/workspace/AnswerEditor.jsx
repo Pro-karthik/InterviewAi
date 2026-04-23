@@ -21,7 +21,7 @@ const AnswerEditor = () => {
         value={currentAnswer}
         onChange={handleChange}
         placeholder="Write your answer here..."
-        className="w-full h-48 border rounded-lg p-4 resize-none focus:outline-none focus:ring-2 focus:ring-black"
+        className="h-48 w-full resize-none rounded-3xl border border-gray-100 bg-white/90 p-5 text-gray-700 shadow-[0_20px_45px_-30px_rgba(77,44,94,0.35)] outline-none transition duration-200 placeholder:text-gray-400 focus:border-[#c9b5d6] focus:ring-4 focus:ring-[#4D2C5E]/10"
       />
 
     </div>

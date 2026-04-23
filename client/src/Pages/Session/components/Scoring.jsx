@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
 export default function ScoreRing({ score = 0, size = 120, strokeWidth = 10 }) {
- const MAX_SCORE = 50;
+ const MAX_SCORE = 200;
 
 const [progress, setProgress] = useState(0);
 
